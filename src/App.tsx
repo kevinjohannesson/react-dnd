@@ -1,9 +1,9 @@
-import React, { useRef, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import './App.css';
 import '@atlaskit/css-reset';
 import styled from 'styled-components';
 import DropArea from './components/DropArea';
-import Block from './components/Block';
+// import Block from './components/Block';
 import Draggable from './components/Draggable';
 
 function App() {
@@ -15,7 +15,6 @@ function App() {
 
   const handleClick = useCallback( (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     console.log('onClick')
-    console.log(draggable);
   }, []);
   return (
     <React.Fragment>
