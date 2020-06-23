@@ -5,9 +5,16 @@ interface Props {
   draggableElement: React.RefObject<HTMLDivElement>
 }
 
+interface i_location {
+  x: number;
+  y: number;
+}
+
 const Draggable = ({draggableElement, children}: Props) => {
-  
+  console.log('rendering.....')
   const [dragging, set_dragging] = useState(false);
+
+  const [dragStart, set_dragStart] = useState<i_location | null>(null);
 
   const dragHandler = useCallback( (event: MouseEvent) => {
     console.log('dragHandler');
@@ -17,31 +24,52 @@ const Draggable = ({draggableElement, children}: Props) => {
     }
   }, [draggableElement]);
 
-  const mouseUpHandler = useCallback( (event) => {
+  const mouseUpHandler = useCallback( (event: MouseEvent) => {
     console.log('mouseUp');
-    set_dragging(false);
-    document.removeEventListener('mousemove', dragHandler)
-    document.removeEventListener('mouseup', mouseUpHandler);
-    
-  }, [dragHandler]);
+    // console.log(dragStart)
+    // set_dragging(false);
+    document.removeEventListener('mousemove', dragHandler);
+    // document.removeEventListener('mouseup', mouseUpHandler);
 
-  const mouseDownHandler = useCallback( (event) => {
-      set_dragging(true)
-      document.addEventListener('mousemove', dragHandler);
-      document.addEventListener('mouseup', mouseUpHandler);
-  }, [dragHandler, mouseUpHandler]);
+    // if(draggableElement.current && dragStart){
+    //   console.log(draggableElement.current)
+    //   draggableElement.current.style.transition = 'transform 0.6s ease-in-out'
+    //   draggableElement.current.style.transform = `translate(${dragStart.x}px, ${dragStart.y})`
+    // }
+
+    
+  }, [dragHandler, dragStart, draggableElement]);
+
+  const mouseDownHandler = useCallback( (event: MouseEvent) => {
+    const mouse = getMouseInformation(event);
+    set_dragStart(mouse.position);
+    document.addEventListener('mousemove', dragHandler);
+  }, [dragHandler]);
 
   
   useEffect(() => {
-    if(draggableElement.current){
-      console.log(draggableElement)
-      draggableElement.current.addEventListener('mousedown', mouseDownHandler)
+    const element = draggableElement.current;
+    if(element){
+      console.log(element)
+      element.addEventListener('mousedown', mouseDownHandler);
     }
-
     return () => {
-      //cleanup
+      if(element){
+        element.removeEventListener('mousedown', mouseDownHandler);
+      }
     }
   }, [draggableElement, mouseDownHandler])
+
+  useEffect(() => {
+    if(dragStart){
+      document.addEventListener('mouseup', mouseUpHandler);
+    }
+    return () => {
+      if(dragStart){
+        document.removeEventListener('mouseup', mouseUpHandler);
+      }
+    }
+  }, [dragStart, mouseUpHandler]);
 
   return (
     <React.Fragment>
