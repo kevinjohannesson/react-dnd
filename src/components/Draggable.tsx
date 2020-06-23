@@ -1,88 +1,99 @@
-import React, { useEffect, useState, useCallback } from 'react'
+import React, { useEffect, useCallback } from 'react'
+import { useDispatch } from 'react-redux';
+// import { setDragging, setDraggable } from '../redux/dragDrop/actions';
+import { setDragging } from '../redux/dragDrop/actions';
 
 interface Props {
-  children: JSX.Element | JSX.Element[]
-  draggableElement: React.RefObject<HTMLDivElement>
+  children: any;
 }
 
-interface i_location {
+interface Ilocation {
   x: number;
   y: number;
 }
 
-const Draggable = ({draggableElement, children}: Props) => {
-  console.log('rendering.....')
-  const [dragging, set_dragging] = useState(false);
+interface State {
+  dragStart: {
+    x: number;
+    y: number;
+  }
+  draggableSize: {
+    height: number;
+    width: number;
+  }
+}
 
-  const [dragStart, set_dragStart] = useState<i_location | null>(null);
 
-  const dragHandler = useCallback( (event: MouseEvent) => {
-    console.log('dragHandler');
-    const mouse = getMouseInformation(event);
-    if(draggableElement.current){
-      translateElement(draggableElement.current, mouse.movement);
-    }
-  }, [draggableElement]);
 
-  const mouseUpHandler = useCallback( (event: MouseEvent) => {
-    console.log('mouseUp');
-    
-    document.removeEventListener('mousemove', dragHandler);
-
-    if(draggableElement.current && dragStart){
-      
-      draggableElement.current.addEventListener('transitionend', () => {
-        if(draggableElement.current && dragStart){
-          draggableElement.current.style.transition = '';
-          draggableElement.current.style.transform = '';
-        }
-      });
-      draggableElement.current.style.transition = 'transform 0.4s ease-in-out'
-      draggableElement.current.style.transform = `translate(0px, 0px)`
-    }
-
-    set_dragStart(null);
-    
-  }, [dragHandler, dragStart, draggableElement]);
-
-  const mouseDownHandler = useCallback( (event: MouseEvent) => {
-    const mouse = getMouseInformation(event);
-
-    set_dragStart(mouse.position);
-    document.addEventListener('mousemove', dragHandler);
-  }, [dragHandler]);
-
+const Draggable = ({children}: Props) => {
+  console.log('%cDraggable', 'color: white; background-color: green; padding: 1rem;');
   
+  const ref = React.createRef<HTMLDivElement>();
+  const dispatch = useDispatch();
+  const handleMouseMove = useCallback( (event: MouseEvent) => {
+    console.log('onMouseMove')
+    // console.log(ref.current);
+    if(ref.current){
+      const mouse = getMouseInformation(event);
+      translateElement(ref.current, mouse.movement);
+    }
+  }, [ref]);
+
+  const handleMouseUp = useCallback( (event: MouseEvent) => {
+    console.log('onMouseUp')
+    document.removeEventListener('mousemove', handleMouseMove);
+    document.removeEventListener('mouseup', handleMouseUp);
+
+    if(ref.current){
+      const element = ref.current;
+      
+      element.addEventListener('transitionend', () => {
+        element.style.transition = '';
+        element.style.transform = '';
+      });
+
+      element.style.transition = 'transform 0.4s ease-in-out';
+      element.style.transform = `translate(0px, 0px)`;
+      element.style.pointerEvents = '';
+
+      dispatch(setDragging(false));
+    }
+  }, [handleMouseMove, ref, dispatch]);
+
+  const handleMouseDown = useCallback( (event: MouseEvent) => {
+    console.log('onMouseDown');
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+    if(ref.current){
+      dispatch(setDragging(true));
+      const element = ref.current;
+      element.style.pointerEvents = 'none';
+    }
+  }, [dispatch, handleMouseMove, handleMouseUp, ref]);
+
   useEffect(() => {
-    const element = draggableElement.current;
+    const element = ref.current
     if(element){
-      console.log(element)
-      element.addEventListener('mousedown', mouseDownHandler);
+      element.addEventListener('mousedown', handleMouseDown);
     }
-    return () => {
+    return ()=>{
       if(element){
-        element.removeEventListener('mousedown', mouseDownHandler);
+        element.removeEventListener('mousedown', handleMouseDown)
       }
     }
-  }, [draggableElement, mouseDownHandler])
+  }, [ref, handleMouseDown]);
 
-  useEffect(() => {
-    if(dragStart){
-      document.addEventListener('mouseup', mouseUpHandler);
-    }
-    return () => {
-      if(dragStart){
-        document.removeEventListener('mouseup', mouseUpHandler);
-      }
-    }
-  }, [dragStart, mouseUpHandler]);
+  const drag = {
+    ref
+  }
 
+  console.log(drag);
   return (
     <React.Fragment>
-      {children}
+      {children(drag)}
     </React.Fragment>
   )
-}
+};
 
 export default Draggable
 
@@ -98,7 +109,6 @@ const getMouseInformation = (event: MouseEvent) => {
     }
   };
 }
-
 
 const translateElement = (element: HTMLElement, movement: {x: number, y: number}) => {
   if(element){

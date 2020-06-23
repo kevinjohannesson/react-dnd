@@ -1,33 +1,48 @@
 import React, { useCallback } from 'react';
-import './App.css';
-import '@atlaskit/css-reset';
 import styled from 'styled-components';
-import DropArea from './components/DropArea';
-// import Block from './components/Block';
+
+import '@atlaskit/css-reset';
+import './App.css';
+
 import Draggable from './components/Draggable';
+import Droppable from './components/Droppable';
+
 
 function App() {
 
-  const dropArea = React.createRef<HTMLDivElement>();
-  // const dropArea = useRef<HTMLDivElement>(null);
-  // const container = useRef<HTMLDivElement>(null);
-  const draggable = React.createRef<HTMLDivElement>();
+  // const draggable = React.createRef<HTMLDivElement>();
+  // const droppable = React.createRef<HTMLDivElement>();
 
   const handleClick = useCallback( (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     console.log('onClick')
   }, []);
+  
   return (
     <React.Fragment>
-      <CONTAINER>
-        <Draggable draggableElement={draggable}>
-          <BLOCK ref={draggable}/>
-        </Draggable>
-      </CONTAINER>
-      <DROPAREA>
-        <DropArea ref={dropArea} />
-      </DROPAREA>
-
+      
+        <CONTAINER>
+          <Draggable >
+            {
+              (drag: any) => {
+                console.log(drag)
+                return (
+                  <BLOCK ref={drag.ref}/>
+                )
+              }
+            }
+          </Draggable>
+        </CONTAINER>
+        
+        <Droppable>
+          {
+            (drop: any) => (
+              <DROPAREA ref={drop.ref}/>
+            )
+          }
+        </Droppable>
+        
       <BUTTON onClick={handleClick}>Click me</BUTTON>
+    
     </React.Fragment>
   );
 }
@@ -70,7 +85,7 @@ const CONTAINER = styled.div`
 `
 
 const DROPAREA = styled.div`
-  width: 400px;
+  width: 300px;
   height: 80%;
   border: 3px dashed white;
   border-radius: 40px;
