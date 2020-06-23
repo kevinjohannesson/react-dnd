@@ -26,22 +26,28 @@ const Draggable = ({draggableElement, children}: Props) => {
 
   const mouseUpHandler = useCallback( (event: MouseEvent) => {
     console.log('mouseUp');
-    // console.log(dragStart)
-    // set_dragging(false);
+    
     document.removeEventListener('mousemove', dragHandler);
-    // document.removeEventListener('mouseup', mouseUpHandler);
 
-    // if(draggableElement.current && dragStart){
-    //   console.log(draggableElement.current)
-    //   draggableElement.current.style.transition = 'transform 0.6s ease-in-out'
-    //   draggableElement.current.style.transform = `translate(${dragStart.x}px, ${dragStart.y})`
-    // }
+    if(draggableElement.current && dragStart){
+      
+      draggableElement.current.addEventListener('transitionend', () => {
+        if(draggableElement.current && dragStart){
+          draggableElement.current.style.transition = '';
+          draggableElement.current.style.transform = '';
+        }
+      });
+      draggableElement.current.style.transition = 'transform 0.4s ease-in-out'
+      draggableElement.current.style.transform = `translate(0px, 0px)`
+    }
 
+    set_dragStart(null);
     
   }, [dragHandler, dragStart, draggableElement]);
 
   const mouseDownHandler = useCallback( (event: MouseEvent) => {
     const mouse = getMouseInformation(event);
+
     set_dragStart(mouse.position);
     document.addEventListener('mousemove', dragHandler);
   }, [dragHandler]);
