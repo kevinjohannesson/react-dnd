@@ -35,5 +35,5 @@ const dragHandler = () => {
 }
 
 const mouseUpHandler = () => {
-  console.log('mouseUp'):
+  console.log('mouseUp');
 }
