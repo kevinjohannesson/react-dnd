@@ -10,9 +10,6 @@ import Droppable from './components/Droppable';
 
 function App() {
 
-  // const draggable = React.createRef<HTMLDivElement>();
-  // const droppable = React.createRef<HTMLDivElement>();
-
   const handleClick = useCallback( (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     console.log('onClick')
   }, []);
@@ -23,21 +20,30 @@ function App() {
         <CONTAINER>
           <Draggable >
             {
-              (drag: any) => {
-                console.log(drag)
+              (draggableData: any) => {
+                // console.log(drag)
                 return (
-                  <BLOCK ref={drag.ref}/>
+                  <BLOCK ref={draggableData.ref} isDragging={draggableData.isDragging}/>
                 )
               }
             }
           </Draggable>
         </CONTAINER>
         
-        <Droppable>
+        <Droppable droppableId="uniqueID">
           {
-            (drop: any) => (
-              <DROPAREA ref={drop.ref}/>
-            )
+            (droppableData: any) => {
+              console.log(droppableData)
+              return (
+              <DROPAREA 
+                ref={droppableData.ref} 
+                isDragging={droppableData.isDragging}
+                isHovered={droppableData.isHovered}
+              >
+                {droppableData.isDragging ? droppableData.isHovered ? 'Drop item here' : 'Drag item here...' : ''}
+                {droppableData.placeholder}
+              </DROPAREA>
+            )}
           }
         </Droppable>
         
@@ -62,16 +68,14 @@ const BUTTON = styled.button`
   border-radius: 0.5rem;
   
   transform: scale(1);
-  &:active {
+  &:focus {
     transform: scale(0.9);
+    outline: none;
   }
   &:hover {
     border: 3px solid skyblue
   }
-  &:focus {
-    outline: none;
-  }
-
+  
 `
 
 const CONTAINER = styled.div`
@@ -84,13 +88,14 @@ const CONTAINER = styled.div`
   border: 3px solid black;
 `
 
-const DROPAREA = styled.div`
+const DROPAREA = styled.div<{isDragging: boolean, isHovered: boolean}>`
   width: 300px;
   height: 80%;
-  border: 3px dashed white;
+  border: ${props => props.isHovered ? '5px solid skyblue' : '3px dashed white'};
   border-radius: 40px;
-  background-color: rgba(255,255,255,0.3);
-
+  
+  
+  background-color: ${props => props.isDragging ? 'rgba(50,255,255,0.3)' : 'rgba(255,255,255,0.3)'};
   position: absolute;
   left: 20px;
   bottom: 20px;
@@ -100,10 +105,19 @@ const DROPAREA = styled.div`
   justify-content: center;
 `
 
-const BLOCK = styled.div`
+const BLOCK = styled.div<{isDragging: boolean}>`
   width: 150px;
   height: 150px;
   border-radius: 20px;
   background-color: white;
+
+
+  border: 3px solid rgba(0,0,0,0);
+
+  border: ${props => props.isDragging ? '5px dashed skyblue' : '3px solid rgba(0,0,0,0)'};
+  
+  &:hover {
+    border: ${props => props.isDragging ? '5px dashed skyblue' : '3px solid skyblue'};
+  }
 `
 
