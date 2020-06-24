@@ -9,8 +9,10 @@ export interface DragDropState {
 
 
 export interface draggableData {
-  height: number;
-  width: number;
+    height: number;
+    width: number;
+    x: number;
+    y: number;
 }
 
 interface IdragStart extends Action {

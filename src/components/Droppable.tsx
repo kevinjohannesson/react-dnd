@@ -41,13 +41,23 @@ export default function Droppable({droppableId, children}: Props): ReactElement 
 
   }, [ref, dispatch, droppableId, droppables]);
 
-  const placeholder = React.createRef<HTMLDivElement>();
+  const placeholderRef = React.createRef<HTMLDivElement>();
+  
+  const placeholder = <PLACEHOLDER 
+    ref={placeholderRef} 
+    isHovered={isHovered} 
+    isDragging={isDragging} 
+    height={draggable ? draggable.height : 0} 
+    width={draggable ? draggable.width : 0} 
+    data-placeholder={droppableId}
+    />
+
 
   const droppableData: IdroppableData = {
     ref, 
     isDragging,
     isHovered, 
-    placeholder: (isHovered && draggable) ? <PLACEHOLDER ref={placeholder} height={draggable.height} width={draggable.width}></PLACEHOLDER> : <PLACEHOLDER ref={placeholder} height={0} width={0}></PLACEHOLDER>
+    placeholder,
   }
   return (
     <React.Fragment>
@@ -56,16 +66,17 @@ export default function Droppable({droppableId, children}: Props): ReactElement 
   )
 }
 
-const PLACEHOLDER = styled.div<{height: number, width: number}>`
-  width: ${props => props.width + 'px'};
-  height: ${props => props.height + 'px'};
+const PLACEHOLDER = styled.div<{height: number, width: number, isHovered: boolean, isDragging: boolean}>`
+  width: ${props => (props.isDragging && props.isHovered) ? props.width + 'px' : '0px'};
+  height: ${props => (props.isDragging && props.isHovered) ? props.height + 'px' : '0px'};
   background-color: rgba(255,255,255,0.3);
-  border: ${props => (props.height !== 0 && props.width !== 0) ? '3px dashed white' : ''};
+  border: ${props => (props.isDragging && props.isHovered) ? '3px dashed white' : ''};
 
   border-radius: ${props => props.height/10 + 'px'};
+
   pointer-events: none;
 
-  transition: all 0.2s ease;
+  transition: width, height, 0.2s ease;
 `
 
 interface IdroppableData {

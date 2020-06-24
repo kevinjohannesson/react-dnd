@@ -1,7 +1,7 @@
 import React, { useEffect, useCallback, useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import { setHover, dragStart, dragEnd } from '../redux/dragDrop/actions';
-import { getDroppables, userIsDragging } from '../redux/dragDrop/selectors';
+import { getDroppables, userIsDragging, getDraggable } from '../redux/dragDrop/selectors';
 
 
 interface Props {
@@ -13,6 +13,8 @@ const Draggable = ({children}: Props) => {
   const dispatch = useDispatch();
   
   const ref = React.createRef<HTMLDivElement>();
+
+  const draggable = useSelector(getDraggable);
 
   const hoveredDroppable = useRef<string | null>(null);
 
@@ -58,27 +60,41 @@ const Draggable = ({children}: Props) => {
       element.addEventListener('transitionend', () => {
         element.style.transition = '';
         element.style.transform = '';
+        dispatch(dragEnd());
       });
 
       element.style.transition = 'transform 0.4s ease-in-out';
-      element.style.transform = `translate(0px, 0px)`;
       element.style.pointerEvents = '';
+      
+      if(hoveredDroppable.current){
+        const placeholder = document.querySelector(`[data-placeholder=${hoveredDroppable.current}]`);
+        
+        if(placeholder && draggable){
+          const DOMRect = placeholder.getBoundingClientRect();
+          element.style.transform = `translate(-${draggable.x - DOMRect.x}px, ${DOMRect.y - draggable.y}px)`;
+        }
+      }
+      else {
+        element.style.transform = `translate(0px, 0px)`;
+      }
 
-      dispatch(dragEnd());
     }
-  }, [handleMouseMove, ref, dispatch]);
+  }, [handleMouseMove, ref, dispatch, draggable]);
 
   const handleMouseDown = useCallback( (event: MouseEvent) => {
     console.log('onMouseDown');
     if(ref.current){
       const DOMRect = ref.current.getBoundingClientRect();
       
-      const draggable = {
-        height: DOMRect.height,
-        width: DOMRect.width
+      const data = {
+          height: DOMRect.height,
+          width: DOMRect.width,
+          x: DOMRect.x,
+          y: DOMRect.y
       }
+      // draggable.current = data;
       
-      dispatch(dragStart(draggable))
+      dispatch(dragStart(data))
     }
   }, [dispatch, ref]);
 
