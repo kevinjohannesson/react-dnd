@@ -14,14 +14,25 @@ function App() {
     <React.Fragment>
       
         <CONTAINER>
-          <Draggable >
+          <Draggable draggableId="draggable1">
             {
-              (draggableData: any) => {
-                // console.log(drag)
-                return (
+              (draggableData: any) => (
                   <BLOCK ref={draggableData.ref} isDragging={draggableData.isDragging}/>
                 )
-              }
+            }
+          </Draggable>
+          <Draggable draggableId="draggable2">
+            {
+              (draggableData: any) => (
+                <BLOCK ref={draggableData.ref} isDragging={draggableData.isDragging}/>
+              )
+            }
+          </Draggable>
+          <Draggable draggableId="draggable3">
+            {
+              (draggableData: any) => (
+                <BLOCK ref={draggableData.ref} isDragging={draggableData.isDragging}/>
+              )
             }
           </Draggable>
         </CONTAINER>
@@ -84,6 +95,8 @@ const BLOCK = styled.div<{isDragging: boolean}>`
 
 
   border: 3px solid rgba(0,0,0,0);
+
+  margin: 0.5rem;
 
   cursor: ${props => props.isDragging ? 'grabbing' : 'grab'};
 

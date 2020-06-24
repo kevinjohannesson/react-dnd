@@ -8,8 +8,10 @@ body {
 
   width: 100vw;
   height: 100vh;
-  background: rgb(0,255,128);
-  background: linear-gradient(0deg, rgba(0,255,128,1) 0%, rgba(202,255,0,1) 100%);
+  background: #659999;  /* fallback for old browsers */
+  background: linear-gradient(to bottom, #f4791f, #659999); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+
+
 }
 
 code {

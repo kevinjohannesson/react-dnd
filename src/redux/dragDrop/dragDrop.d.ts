@@ -9,6 +9,7 @@ export interface DragDropState {
 
 
 export interface draggableData {
+    id: string;
     height: number;
     width: number;
     x: number;
