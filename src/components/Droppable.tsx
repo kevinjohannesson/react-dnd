@@ -1,6 +1,6 @@
 import React, { ReactElement, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { userIsDragging, getHoverId } from '../redux/dragDrop/selectors';
+import { userIsDragging, getHoverId, getDroppables } from '../redux/dragDrop/selectors';
 import { addDroppable } from '../redux/dragDrop/actions';
 import styled from 'styled-components';
 
@@ -22,17 +22,22 @@ export default function Droppable({droppableId, children}: Props): ReactElement 
   
   const dispatch = useDispatch();
   
+  const droppables = useSelector(getDroppables);
+
   useEffect(() => {
-    const element = ref.current;
-    if(element){
-      element.setAttribute('data-droppableId', droppableId);
-      dispatch(addDroppable(droppableId));
+    const droppableIsStored = droppables.some(id => id === droppableId)
+    if(!droppableIsStored){
+      const element = ref.current;
+      if(element){
+        element.setAttribute('data-droppableId', droppableId);
+        dispatch(addDroppable(droppableId));
+      }
     }
     return () => {
       // cleanup
     }
 
-  }, [ref, dispatch, droppableId]);
+  }, [ref, dispatch, droppableId, droppables]);
 
   const placeholder = React.createRef<HTMLDivElement>();
 

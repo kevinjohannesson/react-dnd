@@ -25,9 +25,8 @@ export default function reducer(
     }
 
     case ADD_DROPPABLE: {
-      const isAlreadyStored = state.droppables.some(droppable => droppable === action.droppableId);
+      const isAlreadyStored = state.droppables.some(id => id === action.droppableId);
       if(!isAlreadyStored){
-        // console.log('adding droppable')
         return {
           ...state,
           droppables: [
