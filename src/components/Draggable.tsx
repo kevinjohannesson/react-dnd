@@ -2,6 +2,7 @@ import React, { useEffect, useCallback, useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import { setHover, dragStart, dragEnd } from '../redux/dragDrop/actions';
 import { getDroppables, userIsDragging, getDraggable } from '../redux/dragDrop/selectors';
+import { Idestination } from '../redux/dragDrop/dragDrop.d';
 
 
 interface Props {
@@ -20,41 +21,44 @@ const Draggable = ({children}: Props) => {
 
   const isDragging = useSelector(userIsDragging);
 
+  const destination = useRef<Idestination | null>(null);
+
   const droppables = useSelector(getDroppables);
 
   const handleMouseMove = useCallback( (event: MouseEvent) => {
-    console.log('onMouseMove');
+    // console.log('onMouseMove');
     if(ref.current){
       const mouse = getMouseInformation(event);
       translateElement(ref.current, mouse.movement);
 
       const elements = document.elementsFromPoint(event.clientX, event.clientY);
       
-      const droppable = droppables.find(droppable => (elements[1] as HTMLDivElement).hasAttribute('data-droppableId'));
+      if(elements.length !== 0){
+        const droppable = droppables.find(droppable => (elements[1] as HTMLDivElement).hasAttribute('data-droppableId'));
       
-      if(droppable){
-        if(hoveredDroppable.current !== droppable){
-          console.log('dispatching droppable!')
-          hoveredDroppable.current = droppable;
-          dispatch(setHover(droppable));
+        if(droppable){
+          if(hoveredDroppable.current !== droppable){
+            hoveredDroppable.current = droppable;
+            dispatch(setHover(droppable));
+          }
         }
-      }
-      else {
-        if(hoveredDroppable.current !== null){
-          console.log('dispatching null!')
-          hoveredDroppable.current = null;
-          dispatch(setHover(null));
+        else {
+          if(hoveredDroppable.current !== null){
+            hoveredDroppable.current = null;
+            dispatch(setHover(null));
+          }
         }
       }
     }
   }, [ref, droppables, dispatch, hoveredDroppable]);
 
   const handleMouseUp = useCallback( (event: MouseEvent) => {
-    console.log('onMouseUp')
+    // console.log('onMouseUp')''
+    if(draggable){
     document.removeEventListener('mousemove', handleMouseMove);
     document.removeEventListener('mouseup', handleMouseUp);
 
-    if(ref.current){
+    if(ref.current && destination.current){
       const element = ref.current;
       
       element.addEventListener('transitionend', () => {
@@ -63,26 +67,44 @@ const Draggable = ({children}: Props) => {
         dispatch(dragEnd());
       });
 
-      element.style.transition = 'transform 0.4s ease-in-out';
       element.style.pointerEvents = '';
+
+      const ref_DOMRect = ref.current.getBoundingClientRect();
+      const start = {
+        x: ref_DOMRect.x,
+        y: ref_DOMRect.y
+      };
       
       if(hoveredDroppable.current){
         const placeholder = document.querySelector(`[data-placeholder=${hoveredDroppable.current}]`);
-        
-        if(placeholder && draggable){
-          const DOMRect = placeholder.getBoundingClientRect();
-          element.style.transform = `translate(-${draggable.x - DOMRect.x}px, ${DOMRect.y - draggable.y}px)`;
+        if(placeholder) {
+          const placeholder_DOMRect = placeholder.getBoundingClientRect();
+          const {x, y} = placeholder_DOMRect;
+          destination.current = {x, y};
         }
       }
-      else {
-        element.style.transform = `translate(0px, 0px)`;
-      }
+
+      const distance = Math.sqrt( 
+        (Math.pow( (start.x - destination.current.x), 2 ) ) +
+        (Math.pow( (start.y - destination.current.y), 2 ) )
+      );
+
+      const translation = {
+        x: -(draggable.x - destination.current.x),
+        y: destination.current.y - draggable.y,
+      };
+     
+      const time = distance / 1000;
+      
+      element.style.transition = `transform ${0.1 + (time > 1 ? 1 : time)}s ease`;
+      element.style.transform = `translate(${translation.x}px, ${translation.y}px)`;
 
     }
-  }, [handleMouseMove, ref, dispatch, draggable]);
+  }
+  }, [handleMouseMove, ref, dispatch, draggable, destination]);
 
   const handleMouseDown = useCallback( (event: MouseEvent) => {
-    console.log('onMouseDown');
+    // console.log('onMouseDown');
     if(ref.current){
       const DOMRect = ref.current.getBoundingClientRect();
       
@@ -92,7 +114,8 @@ const Draggable = ({children}: Props) => {
           x: DOMRect.x,
           y: DOMRect.y
       }
-      // draggable.current = data;
+      
+      destination.current = data;
       
       dispatch(dragStart(data))
     }

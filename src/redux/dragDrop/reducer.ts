@@ -20,7 +20,8 @@ export default function reducer(
       return {
         ...state,
         isDragging: false,
-        draggable: null
+        draggable: null,
+        hover: null,
       }
     }
 

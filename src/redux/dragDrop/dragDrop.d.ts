@@ -15,6 +15,11 @@ export interface draggableData {
     y: number;
 }
 
+export interface Idestination {
+  x: number;
+  y: number;
+}
+
 interface IdragStart extends Action {
   type: typeof DRAG_START;
   draggable: draggableData; 
