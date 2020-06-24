@@ -1,4 +1,4 @@
-import { SET_DRAGGABLE, SET_DRAGGING, DragDropState, DragDropActions, ADD_DROPPABLE, SET_HOVER } from "./dragDrop.d";
+import { DragDropState, DragDropActions, ADD_DROPPABLE, SET_HOVER, DRAG_START, DRAG_END } from "./dragDrop.d";
 import { initialState } from "./initial_state";
 
 
@@ -7,35 +7,38 @@ export default function reducer(
   action: DragDropActions
 ) {
   switch (action.type) {
-    case SET_DRAGGING: {
+    
+    case DRAG_START: {
       return {
         ...state,
-        isDragging: action.condition
-      };
+        isDragging: true,
+        draggable: action.draggable
+      }
     }
-    case SET_DRAGGABLE: {
+
+    case DRAG_END: {
       return {
         ...state,
-        draggable: action.ref
-      };
+        isDragging: false,
+        draggable: null
+      }
     }
+
     case ADD_DROPPABLE: {
-      const isAlreadyStored = state.droppables.some(droppable => droppable.id === action.droppableId);
+      const isAlreadyStored = state.droppables.some(droppable => droppable === action.droppableId);
       if(!isAlreadyStored){
-        console.log('adding droppable')
+        // console.log('adding droppable')
         return {
           ...state,
           droppables: [
             ...state.droppables,
-            {
-              id: action.droppableId,
-              element: action.element
-            }
+            action.droppableId
           ]
         }
       }
       else return state
     }
+
     case SET_HOVER: {
       const idIsNew = state.hover !== action.droppableId;
       if(idIsNew){
@@ -46,6 +49,8 @@ export default function reducer(
       }
       else return state;
     }
+
+
 
     default: {
       return state;

@@ -2,47 +2,24 @@ import { Action } from 'redux';
 
 export interface DragDropState {
   isDragging: boolean;
-  draggable: React.RefObject<HTMLDivElement> | null;
-  droppables: {
-      id: string,
-      element: HTMLElement,
-  }[];
+  draggable: draggableData | null;
+  droppables: string[];
   hover: string | null;
-  // MOET EEN HOVER OBJECT MAKEN MET SELECTOR VOOR DROPPABLE
 };
 
 
-
-
-
-
-interface IsetDestination {
-  type: typeof SET_DESTINATION;
-  position: {
-    x: number;
-    y: number;
-  }
+export interface draggableData {
+  height: number;
+  width: number;
 }
 
-interface IsetDraggable {
-  type: typeof SET_DRAGGABLE;
-  ref: any;
+interface IdragStart extends Action {
+  type: typeof DRAG_START;
+  draggable: draggableData; 
 }
 
-interface IsetDragging extends Action{
-  type: typeof SET_DRAGGING;
-  condition: boolean;
-}
-
-interface IsetDraggable extends Action{
-  type: typeof SET_DRAGGABLE;
-  ref: any;
-}
-
-interface IaddDroppable extends Action {
-  type: typeof ADD_DROPPABLE;
-  droppableId: string;
-  element: HTMLElement;
+interface IdragEnd extends Action {
+  type: typeof DRAG_END;
 }
 
 interface IsetHover extends Action {
@@ -50,10 +27,27 @@ interface IsetHover extends Action {
   droppableId: string | null;
 }
 
-export type DragDropActions = IsetDragging | IsetDraggable | IaddDroppable | IsetHover;
+
+interface IsetDestination extends Action{
+  type: typeof SET_DESTINATION;
+  position: {
+    x: number;
+    y: number;
+  }
+}
+
+interface IaddDroppable extends Action {
+  type: typeof ADD_DROPPABLE;
+  droppableId: string;
+}
+
+export type DragDropActions = IaddDroppable | IsetHover | IdragStart | IdragEnd;
 
 export const SET_DESTINATION = "SET_DESTINATION";
-export const SET_DRAGGING = "SET_DRAGGING";
-export const SET_DRAGGABLE = "SET_DRAGGABLE";
+
+
 export const ADD_DROPPABLE = "ADD_DROPPABLE";
 export const SET_HOVER = "SET_HOVER";
+
+export const DRAG_START = "DRAG START";
+export const DRAG_END = "DRAG_END";

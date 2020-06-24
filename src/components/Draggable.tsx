@@ -1,41 +1,24 @@
-import React, { useEffect, useCallback } from 'react'
+import React, { useEffect, useCallback, useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
-// import { setDragging, setDraggable } from '../redux/dragDrop/actions';
-import { setDragging, setHover } from '../redux/dragDrop/actions';
+import { setHover, dragStart, dragEnd } from '../redux/dragDrop/actions';
 import { getDroppables, userIsDragging } from '../redux/dragDrop/selectors';
+
 
 interface Props {
   children: any;
 }
 
-interface Ilocation {
-  x: number;
-  y: number;
-}
-
-interface State {
-  dragStart: {
-    x: number;
-    y: number;
-  }
-  draggableSize: {
-    height: number;
-    width: number;
-  }
-}
-
-
-
 const Draggable = ({children}: Props) => {
   // console.log('%cDraggable', 'color: white; background-color: green; padding: 1rem;');
+  const dispatch = useDispatch();
   
   const ref = React.createRef<HTMLDivElement>();
-  const dispatch = useDispatch();
+
+  const hoveredDroppable = useRef<string | null>(null);
 
   const isDragging = useSelector(userIsDragging);
 
   const droppables = useSelector(getDroppables);
-  // console.log(droppables);
 
   const handleMouseMove = useCallback( (event: MouseEvent) => {
     console.log('onMouseMove');
@@ -44,19 +27,25 @@ const Draggable = ({children}: Props) => {
       translateElement(ref.current, mouse.movement);
 
       const elements = document.elementsFromPoint(event.clientX, event.clientY);
-      // console.log(elements); 
-      const droppable = droppables.find(droppable => droppable.element === elements[1]);
+      
+      const droppable = droppables.find(droppable => (elements[1] as HTMLDivElement).hasAttribute('data-droppableId'));
+      
       if(droppable){
-        // console.log(droppable);
-        // console.log('able to drop item here....')
-        dispatch(setHover(droppable.id));
+        if(hoveredDroppable.current !== droppable){
+          console.log('dispatching droppable!')
+          hoveredDroppable.current = droppable;
+          dispatch(setHover(droppable));
+        }
       }
       else {
-        dispatch(setHover(null));
+        if(hoveredDroppable.current !== null){
+          console.log('dispatching null!')
+          hoveredDroppable.current = null;
+          dispatch(setHover(null));
+        }
       }
-    // const dropContainer = elements.find(element => (element as HTMLDivElement).dataset.droppable);
     }
-  }, [ref, droppables, dispatch]);
+  }, [ref, droppables, dispatch, hoveredDroppable]);
 
   const handleMouseUp = useCallback( (event: MouseEvent) => {
     console.log('onMouseUp')
@@ -75,14 +64,21 @@ const Draggable = ({children}: Props) => {
       element.style.transform = `translate(0px, 0px)`;
       element.style.pointerEvents = '';
 
-      dispatch(setDragging(false));
+      dispatch(dragEnd());
     }
   }, [handleMouseMove, ref, dispatch]);
 
   const handleMouseDown = useCallback( (event: MouseEvent) => {
     console.log('onMouseDown');
     if(ref.current){
-      dispatch(setDragging(true));
+      const DOMRect = ref.current.getBoundingClientRect();
+      
+      const draggable = {
+        height: DOMRect.height,
+        width: DOMRect.width
+      }
+      
+      dispatch(dragStart(draggable))
     }
   }, [dispatch, ref]);
 
@@ -113,14 +109,14 @@ const Draggable = ({children}: Props) => {
   }, [handleMouseMove, handleMouseUp, ref, isDragging])
 
 
-  const drag = {
+  const draggableData = {
     ref,
     isDragging
   }
 
   return (
     <React.Fragment>
-      {children(drag)}
+      {children(draggableData)}
     </React.Fragment>
   )
 };

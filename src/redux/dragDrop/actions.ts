@@ -1,39 +1,24 @@
-import { IsetDestination, SET_DESTINATION, IsetDragging, SET_DRAGGING, SET_DRAGGABLE, IsetDraggable, ADD_DROPPABLE, IaddDroppable, IsetHover, SET_HOVER} from "./dragDrop.d"
+import { 
+  ADD_DROPPABLE,
+  IaddDroppable,
+  IsetHover,
+  SET_HOVER,
+  draggableData,
+  IdragStart,
+  DRAG_START,
+  IdragEnd,
+  DRAG_END} from "./dragDrop.d"
 
-// export function setDragging(condition: boolean): IsetDragging {
-//   return {
-//     type: SET_DRAGGING,
-//     condition
-//   }
-// }
-
-export const setDragging = ( condition: boolean) => {
+export function dragStart(draggable: draggableData): IdragStart {
   return {
-    type: SET_DRAGGING,
-    condition
-  } as IsetDragging
-}
-
-export const setDraggable = ( ref: any ) => {
-  return {
-    type: SET_DRAGGABLE,
-    ref
-  } as IsetDraggable
-}
-
-
-export function setDestination(position: {x: number, y: number}): IsetDestination {
-  return {
-    type: SET_DESTINATION,
-    position  
+    type: DRAG_START,
+    draggable
   }
 }
 
-export function addDroppable( droppableId: string, element: HTMLElement): IaddDroppable {
+export function dragEnd(): IdragEnd {
   return {
-    type: ADD_DROPPABLE,
-    droppableId,
-    element 
+    type: DRAG_END
   }
 }
 
@@ -43,3 +28,11 @@ export function setHover(droppableId: string | null): IsetHover {
     droppableId
   }
 }
+
+export function addDroppable( droppableId: string): IaddDroppable {
+  return {
+    type: ADD_DROPPABLE,
+    droppableId
+  }
+}
+

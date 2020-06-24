@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 import '@atlaskit/css-reset';
@@ -9,10 +9,6 @@ import Droppable from './components/Droppable';
 
 
 function App() {
-
-  const handleClick = useCallback( (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    console.log('onClick')
-  }, []);
   
   return (
     <React.Fragment>
@@ -33,7 +29,7 @@ function App() {
         <Droppable droppableId="uniqueID">
           {
             (droppableData: any) => {
-              console.log(droppableData)
+              // console.log(droppableData)
               return (
               <DROPAREA 
                 ref={droppableData.ref} 
@@ -46,37 +42,12 @@ function App() {
             )}
           }
         </Droppable>
-        
-      <BUTTON onClick={handleClick}>Click me</BUTTON>
     
     </React.Fragment>
   );
 }
 
 export default App;
-
-const BUTTON = styled.button`
-  padding: 1rem;
-  font-size: 1.5rem;
-  color: skyblue;
-  position: absolute;
-  right: 1rem;
-  bottom: 1rem;
-  background-color: white;
-
-  border: 3px solid rgba(0,0,0,0);
-  border-radius: 0.5rem;
-  
-  transform: scale(1);
-  &:focus {
-    transform: scale(0.9);
-    outline: none;
-  }
-  &:hover {
-    border: 3px solid skyblue
-  }
-  
-`
 
 const CONTAINER = styled.div`
   display: flex;
