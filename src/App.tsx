@@ -62,7 +62,7 @@ const CONTAINER = styled.div`
 const DROPAREA = styled.div<{isDragging: boolean, isHovered: boolean}>`
   width: 300px;
   height: 80%;
-  border: ${props => props.isHovered ? '5px solid skyblue' : '3px dashed white'};
+  border: ${props => (props.isDragging && props.isHovered) ? '5px solid skyblue' : '3px dashed white'};
   border-radius: 40px;
   
   
