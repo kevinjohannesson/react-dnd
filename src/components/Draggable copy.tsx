@@ -1,7 +1,7 @@
 import React, { useEffect, useCallback, useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import { setHover, dragStart, dragEnd } from '../redux/dragDrop/actions';
-import { getDroppables, getDraggableById } from '../redux/dragDrop/selectors';
+import { getDroppables, userIsDragging, getDraggable, userIsDraggingDraggable, getDraggableById } from '../redux/dragDrop/selectors';
 import { Idestination } from '../redux/dragDrop/dragDrop.d';
 
 
@@ -11,15 +11,21 @@ interface Props {
 }
 
 const Draggable = ({draggableId, children}: Props) => {
-  // console.log(`%cDraggable ${draggableId}`, 'color: white; background-color: green; padding: 1rem;');
+  // console.log('%cDraggable', 'color: white; background-color: green; padding: 1rem;');
   const dispatch = useDispatch();
   
   const ref = React.createRef<HTMLDivElement>();
 
-  const draggable = useSelector(getDraggableById(draggableId));
+  const draggable = useSelector(getDraggable);
+  const isDraggable = useSelector(getDraggableById(draggableId));
+  console.log(isDraggable)
 
   const hoveredDroppable = useRef<string | null>(null);
-  
+
+  // const isDragging = useSelector(userIsDragging);
+  const isDragging = useSelector(userIsDraggingDraggable(draggableId));
+  console.log(isDragging);
+
   const destination = useRef<Idestination | null>(null);
 
   const droppables = useSelector(getDroppables);
@@ -52,31 +58,28 @@ const Draggable = ({draggableId, children}: Props) => {
   }, [ref, droppables, dispatch, hoveredDroppable]);
 
   const handleMouseUp = useCallback( (event: MouseEvent) => {
-    // console.log('onMouseUp');
+    // console.log('onMouseUp')''
     if(draggable){
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
+    document.removeEventListener('mousemove', handleMouseMove);
+    document.removeEventListener('mouseup', handleMouseUp);
 
-      if(ref.current && destination.current){
-        const element = ref.current;
-        
-        const handleTransitionEnd = () => {
-          element.style.transition = '';
-          element.style.transform = '';
-          element.style.zIndex = '';
-          element.removeEventListener('transitionend', handleTransitionEnd);
-          dispatch(dragEnd());
-        }
+    if(ref.current && destination.current){
+      const element = ref.current;
+      
+      element.addEventListener('transitionend', () => {
+        element.style.transition = '';
+        element.style.transform = '';
+        element.style.zIndex = '';
+        dispatch(dragEnd());
+      });
 
-        element.addEventListener('transitionend', handleTransitionEnd );
+      element.style.pointerEvents = '';
 
-        element.style.pointerEvents = '';
-
-        const ref_DOMRect = ref.current.getBoundingClientRect();
-        const start = {
-          x: ref_DOMRect.x,
-          y: ref_DOMRect.y
-        };
+      const ref_DOMRect = ref.current.getBoundingClientRect();
+      const start = {
+        x: ref_DOMRect.x,
+        y: ref_DOMRect.y
+      };
       
       if(hoveredDroppable.current){
         const placeholder = document.querySelector(`[data-placeholder=${hoveredDroppable.current}]`);
@@ -107,7 +110,7 @@ const Draggable = ({draggableId, children}: Props) => {
   }, [handleMouseMove, ref, dispatch, draggable, destination]);
 
   const handleMouseDown = useCallback( (event: MouseEvent) => {
-    // console.log('onMouseDown');
+    console.log('onMouseDown');
     if(ref.current){
       const DOMRect = ref.current.getBoundingClientRect();
       
@@ -140,7 +143,7 @@ const Draggable = ({draggableId, children}: Props) => {
   useEffect(()=>{
     if(draggable && draggable.id === draggableId) {
       const element = ref.current;
-      if(element){
+      if(element && isDragging){
         document.addEventListener('mousemove', handleMouseMove);
         document.addEventListener('mouseup', handleMouseUp);
       }
@@ -151,12 +154,12 @@ const Draggable = ({draggableId, children}: Props) => {
         }
       }
     }
-  }, [handleMouseMove, handleMouseUp, ref, draggableId, draggable])
+  }, [handleMouseMove, handleMouseUp, ref, isDragging, draggableId, draggable])
 
 
   const draggableData = {
     ref,
-    isDragging: draggable ? true : false
+    isDragging
   }
 
   return (

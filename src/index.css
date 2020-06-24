@@ -8,10 +8,8 @@ body {
 
   width: 100vw;
   height: 100vh;
-  background: #659999;  /* fallback for old browsers */
-  background: linear-gradient(to bottom, #f4791f, #659999); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
-
-
+  background: #dd3e54;  /* fallback for old browsers */
+  background: linear-gradient(to bottom, #6be585, #dd3e54); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
 }
 
 code {

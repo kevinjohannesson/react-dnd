@@ -50,7 +50,7 @@ export default function Droppable({droppableId, children}: Props): ReactElement 
     height={draggable ? draggable.height : 0} 
     width={draggable ? draggable.width : 0} 
     data-placeholder={droppableId}
-    />
+  />
 
 
   const droppableData: IdroppableData = {
@@ -76,7 +76,7 @@ const PLACEHOLDER = styled.div<{height: number, width: number, isHovered: boolea
 
   pointer-events: none;
 
-  transition: width, height, 0.2s ease;
+  transition: width, height, 0.1s ease;
 `
 
 interface IdroppableData {
