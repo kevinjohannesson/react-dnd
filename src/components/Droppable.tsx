@@ -1,6 +1,6 @@
 import React, { ReactElement, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { userIsDragging, getHoverId, getDroppables } from '../redux/dragDrop/selectors';
+import { userIsDragging, getHoverId, getDroppables, getDraggable } from '../redux/dragDrop/selectors';
 import { addDroppable } from '../redux/dragDrop/actions';
 import styled from 'styled-components';
 
@@ -24,6 +24,8 @@ export default function Droppable({droppableId, children}: Props): ReactElement 
   
   const droppables = useSelector(getDroppables);
 
+  const draggable = useSelector(getDraggable);
+
   useEffect(() => {
     const droppableIsStored = droppables.some(id => id === droppableId)
     if(!droppableIsStored){
@@ -42,7 +44,10 @@ export default function Droppable({droppableId, children}: Props): ReactElement 
   const placeholder = React.createRef<HTMLDivElement>();
 
   const droppableData: IdroppableData = {
-    ref, isDragging, isHovered, placeholder: <PLACEHOLDER ref={placeholder} height={200} width={100}></PLACEHOLDER>
+    ref, 
+    isDragging,
+    isHovered, 
+    placeholder: (isHovered && draggable) ? <PLACEHOLDER ref={placeholder} height={draggable.height} width={draggable.width}></PLACEHOLDER> : <PLACEHOLDER ref={placeholder} height={0} width={0}></PLACEHOLDER>
   }
   return (
     <React.Fragment>
@@ -52,11 +57,15 @@ export default function Droppable({droppableId, children}: Props): ReactElement 
 }
 
 const PLACEHOLDER = styled.div<{height: number, width: number}>`
-  width: 100%;
-  height: 200px;
-  background-color: rgba(100,100,255,0.6);
+  width: ${props => props.width + 'px'};
+  height: ${props => props.height + 'px'};
+  background-color: rgba(255,255,255,0.3);
+  border: ${props => (props.height !== 0 && props.width !== 0) ? '3px dashed white' : ''};
 
+  border-radius: ${props => props.height/10 + 'px'};
   pointer-events: none;
+
+  transition: all 0.2s ease;
 `
 
 interface IdroppableData {

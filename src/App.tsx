@@ -36,7 +36,7 @@ function App() {
                 isDragging={droppableData.isDragging}
                 isHovered={droppableData.isHovered}
               >
-                {droppableData.isDragging ? droppableData.isHovered ? 'Drop item here' : 'Drag item here...' : ''}
+                
                 {droppableData.placeholder}
               </DROPAREA>
             )}
@@ -84,6 +84,8 @@ const BLOCK = styled.div<{isDragging: boolean}>`
 
 
   border: 3px solid rgba(0,0,0,0);
+
+  cursor: ${props => props.isDragging ? 'grabbing' : 'grab'};
 
   border: ${props => props.isDragging ? '5px dashed skyblue' : '3px solid rgba(0,0,0,0)'};
   
