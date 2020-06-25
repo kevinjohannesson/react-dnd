@@ -10,9 +10,11 @@ export default function mouseUp(
     destination: React.MutableRefObject<vector | null>,
     dragoverId: React.MutableRefObject<string | null>, 
     mouseMoveHandler: (event: MouseEvent) => void,
+    mouseUpHandler: (event: MouseEvent) => void,
     dispatch: Dispatch<any>,
   ){
   document.removeEventListener('mousemove', mouseMoveHandler);
+  
 
   const DOMRect = element.getBoundingClientRect();
   const start = {
@@ -46,9 +48,10 @@ export default function mouseUp(
     }
     element.addEventListener('transitionend', handleTransitionEnd);
     const time = distance / 1000;
-    element.style.transition = `transform ${0.1 + ((time > 1 ? 1 : time)/3)}s ease`;
+    element.style.transition = `top, left, ${0.1 + ((time > 1 ? 1 : time)/3)}s ease`;
     translateElement(element, translation);
     dispatch(dragEnd());
+    document.removeEventListener('mouseup', mouseUpHandler);
   }
 }
 

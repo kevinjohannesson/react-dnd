@@ -14,16 +14,19 @@ export default function Block({id, index, shape}: Props): ReactElement {
   return (
     <Draggable draggableId={id} draggableIndex={index}>
       {
-        (draggableData: any) => (
-        <BLOCK ref={draggableData.ref} isDragging={draggableData.isDragging} shape={shape}><h2>{index}</h2></BLOCK>
-        )
+        (draggableData: any) => 
+        {
+          // console.log(draggableData)
+          return(
+            <BLOCK ref={draggableData.ref} userIsDraggingThis={draggableData.userIsDraggingThis} shape={shape}><h2>{index}</h2></BLOCK>
+          )}
       }
     </Draggable>
   )
 }
 
 
-const BLOCK = styled.div<{isDragging: boolean, shape?: SHAPE}>`
+const BLOCK = styled.div<{userIsDraggingThis: boolean, shape?: SHAPE}>`
   width: ${props => props.shape === 'rectangle' ? '250px' : props.shape === 'circle' ? '100px' : '150px'};
   height: ${props => props.shape === 'circle' ? '100px' : '150px' };
   border-radius: ${props => props.shape === 'circle' ? '75px' : '25px'};
@@ -39,12 +42,13 @@ const BLOCK = styled.div<{isDragging: boolean, shape?: SHAPE}>`
   display: flex;
   align-items: center;
   justify-content: center;
-
-  cursor: ${props => props.isDragging ? 'grabbing' : 'grab'};
-
-  border: ${props => props.isDragging ? '5px dashed skyblue' : '3px solid rgba(0,0,0,0)'};
+  
+  color: #a8c0ff;
+  cursor: ${props => props.userIsDraggingThis ? 'grabbing' : 'grab'};
+  
+  border: ${props => props.userIsDraggingThis ? '5px dashed skyblue' : '3px solid rgba(0,0,0,0)'};
   
   &:hover {
-    border: ${props => props.isDragging ? '5px dashed skyblue' : '3px solid skyblue'};
+    border: ${props => props.userIsDraggingThis ? '5px dashed skyblue' : '3px solid skyblue'};
   }
 `

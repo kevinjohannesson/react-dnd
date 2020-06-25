@@ -1,8 +1,7 @@
 import { DragDropState } from "./dragDrop.d";
 
 export const initialState: DragDropState = {
-  isDragging: false,
-  draggable: null,
-  droppables: [],
-  hover: null,
+  userIsDragging: false,
+  draggableData: null,
+  dragOverId: null,
 };

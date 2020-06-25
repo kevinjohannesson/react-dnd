@@ -5,7 +5,8 @@ export default function resetElement(element: HTMLElement) {
 
   element.style.zIndex = '';
   
-  element.style.transform = '';
-  
   element.style.transition = '';
+
+  element.style.userSelect= '';
+  element.style.pointerEvents = '';
 }

@@ -1,6 +1,6 @@
 import React, { useEffect, useCallback, useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
-import { getDraggableDataById, isUserDragging } from '../../redux/dragDrop/selectors';
+import { get_draggableDataById, isUserDragging, select_draggableData, userIsDraggingDraggable } from '../../redux/dragDrop/selectors';
 import { vector } from '../../redux/dragDrop/dragDrop';
 
 import mouseMove from './mouseMove';
@@ -11,6 +11,8 @@ import extractElement from './extractElement';
 
 import blockEvents from './blockEvents';
 import unblockEvents from './unblockEvents';
+import { dragStart, dragEnd } from '../../redux/dragDrop/actions';
+import get_draggableData from './get_draggableData';
 
 
 interface Props {
@@ -20,64 +22,122 @@ interface Props {
 }
 
 const Draggable = ({draggableId, draggableIndex, children}: Props) => {
+  console.log(`%cDraggable ${draggableId}`, 'color: white; background-color: green; padding: 1rem;');
 
   const dispatch = useDispatch();
   
   const ref = React.createRef<HTMLElement | null>();
-  
+
+  const listenMouseDown = useRef(false);
+  const listenMouseMove = useRef(false);
+  const listenMouseUp = useRef(false);
+
   const userIsDragging = useSelector(isUserDragging);
-  const draggableData = useSelector(getDraggableDataById(draggableId));
+  // const userIsDragging = 
 
-  const dragoverId = useRef<string | null>(null);
-  const destination = useRef<vector | null>(null);
+  const draggableData = useSelector(select_draggableData);
 
-  
+
+  // console.log(listenMouseDown.current);
+
   const handleMouseMove = useCallback((event: MouseEvent) => {
-    if(ref.current) mouseMove(event, ref.current, dragoverId, dispatch);
-  }, [ref, dragoverId, dispatch]);
+    console.log('handleMouseMove');
+    // console.log(ref.current);
+  }, [ref]);
 
   const handleMouseUp = useCallback((event: MouseEvent) => {
-    if(ref.current) mouseUp(event, ref.current, destination, dragoverId, handleMouseMove, dispatch);
-  }, [ref, destination, handleMouseMove, dispatch]);
+    console.log('handleMouseUp');
+    console.log(ref.current);
+    if(ref.current){
+      document.removeEventListener('mousemove', handleMouseMove);
+      listenMouseMove.current = false;
+      document.removeEventListener('mouseup', handleMouseUp);
+      listenMouseUp.current = false;
+      
+      dispatch(dragEnd())
+    }
+  }, [ref, handleMouseMove, dispatch]);
 
   const handleMouseDown = useCallback((event: MouseEvent) => {
-    if(ref.current) mouseDown(event, ref.current, draggableId, draggableIndex, destination, dispatch);
-  }, [ref, draggableId, draggableIndex, destination, dispatch]);
-
-
-  useEffect(() => {
-    const element = ref.current;
-    if(element) element.addEventListener('mousedown', handleMouseDown);
-    return () => { if(element) element.removeEventListener('mousedown', handleMouseDown); };
-  }, [ref, handleMouseDown]);
-
-  useEffect(() => {
-    const element = ref.current;
-    if(element){
-      if(userIsDragging) blockEvents(element);
-      else unblockEvents(element);
+    console.log('handleMouseDown');
+    console.log(ref.current);
+    if(ref.current) {
+      const draggableData = get_draggableData(ref.current, draggableId, draggableIndex);
+      console.log(draggableData);
+      ref.current.removeEventListener('mousedown', handleMouseDown);
+      listenMouseDown.current = false;
+      dispatch(dragStart(draggableData));
     }
-  }, [userIsDragging, ref]);
+  }, [ref, dispatch, draggableId, draggableIndex]);
 
-  useEffect(() => {
+  
+
+  useEffect(()=>{
+    console.log('useEffect1');
     const element = ref.current;
-    if(userIsDragging && draggableData && element){
-        extractElement(element, draggableData);
-        document.addEventListener('mousemove', handleMouseMove);
-        document.addEventListener('mouseup', handleMouseUp);
+    if(element && !listenMouseDown.current && !draggableData) {
+      console.log('useEffect1_inner');
+      element.addEventListener('mousedown', handleMouseDown);
+      listenMouseDown.current = true;
     }
     return () => {
-      if(!userIsDragging && element){
-        document.removeEventListener('mousemove', handleMouseMove);
-        document.removeEventListener('mouseup', handleMouseUp);
+      console.log('useEffect1_cleanup');
+      if(element && listenMouseDown.current) {
+        console.log('useEffect1_cleanup_inner');
+        element.removeEventListener('mousedown', handleMouseDown);
+        listenMouseDown.current = false;
       }
     }
-  }, [userIsDragging, draggableData, ref, handleMouseMove, handleMouseUp]);
+  }, [ref, draggableData, handleMouseDown]);
+
+  useEffect(() => {
+    console.log('useEffect2');
+    const element = ref.current;
+    // console.log(element);
+    if(element && draggableData && draggableData.id === draggableId && !listenMouseMove.current && !listenMouseUp.current){
+      console.log('useEffect2_inner');
+      document.addEventListener('mousemove', handleMouseMove);
+      listenMouseMove.current = true;
+      document.addEventListener('mouseup', handleMouseUp);
+      listenMouseUp.current = true;
+    }
+    return () => {
+      console.log('useEffect2_cleanup');
+      if(!draggableData && listenMouseMove.current && listenMouseUp.current){
+        console.log('useEffect2_cleanup_inner');
+        document.removeEventListener('mousemove', handleMouseMove);
+        listenMouseMove.current = false;
+        document.removeEventListener('mouseup', handleMouseUp);
+        listenMouseUp.current = false;
+      }
+    }
+  }, [ref, draggableData, handleMouseMove, handleMouseUp]);
+
+  useEffect(() => {
+    console.log('useEffect3');
+    const element = ref.current;
+    if(element && draggableData){
+      console.log('useEffect3_inner');
+      if(draggableData.id === draggableId) element.style.userSelect = 'none';
+      else blockEvents(element);
+    }
+    return () => {
+      console.log('useEffect3_cleanup');
+      if(element && draggableData){
+        console.log('useEffect3_cleanup_inner');
+        unblockEvents(element);
+      }
+    }
+  })
+
+
+
+
 
 
   const exportedData = {
     ref,
-    isDragging: draggableData ? true : false
+    userIsDraggingThis: false
   }
 
   return (

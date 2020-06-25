@@ -9,9 +9,14 @@ export default function extractElement(element: HTMLElement, data: draggableData
     left: margin ? parseInt(margin[3] || margin[1] || margin[0]) : 0,
   }
   
+  element.style.pointerEvents = '';
+  
   element.style.top = data.y - marginValues.top + 'px';
   element.style.left = data.x - marginValues.left + 'px';
   element.style.position = 'fixed';
   element.style.zIndex = '5000';
-  element.style.transform = 'translate(0px, 0px)';
+
+  // console.log('hallo');
+  // const clone = element.cloneNode(true)
+  // document.getElementById('root')?.appendChild(clone);
 }

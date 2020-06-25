@@ -1,21 +1,21 @@
-export const translateElement = (element: HTMLElement, movement: {x: number, y: number}) => {
+import { vector } from "../../redux/dragDrop/dragDrop";
+
+export const translateElement = (
+    element: HTMLElement, 
+    position: vector
+  ) => {
   if(element){
-    const translate = { 
-      x: movement.x, 
-      y: movement.y 
-    }
+    // const translate = { 
+    //   x: movement.x, 
+    //   y: movement.y 
+    // }
 
-    const hasTransform = element.style.transform ? true : false;
-    if(hasTransform) {
-      const translation = element.style.transform.match(/-?\d+/g);
-      if(translation && translation.length === 2){
-        const [x, y] = translation.map(Number);
-        translate.x += x;
-        translate.y += y;
-      }
-    }
+    // const {top, left} = element.style;
 
+    // const left = movement.x + 
+// 
     element.style.zIndex = '5000';
-    element.style.transform = `translate(${translate.x}px, ${translate.y}px)`;
+    element.style.left = `${position.x}px`;
+    element.style.top = `${position.y}px`;
   }
 }

@@ -1,44 +1,26 @@
 import { 
-  ADD_DROPPABLE,
-  IaddDroppable,
-  IsetHover,
-  SET_HOVER,
-  draggableData,
-  IdragStart,
   DRAG_START,
-  IdragEnd,
   DRAG_END,
   DRAG_OVER,
-  IdragOver,} from "./dragDrop.d"
+  draggableData as interface_draggableData,
+  dragStart as interface_dragStart,
+  dragEnd as interface_dragEnd,
+  dragOver as interface_dragOver,} from "./dragDrop.d"
 
-export function dragStart(draggable: draggableData): IdragStart {
+export function dragStart(draggableData: interface_draggableData): interface_dragStart {
   return {
     type: DRAG_START,
-    draggable
+    draggableData
   }
 }
 
-export function dragEnd(): IdragEnd {
+export function dragEnd(): interface_dragEnd {
   return {
     type: DRAG_END
   }
 }
 
-export function setHover(droppableId: string | null): IsetHover {
-  return {
-    type: SET_HOVER,
-    droppableId
-  }
-}
-
-export function addDroppable( droppableId: string): IaddDroppable {
-  return {
-    type: ADD_DROPPABLE,
-    droppableId
-  }
-}
-
-export function dragOver( droppableId: string | null ): IdragOver {
+export function dragOver(droppableId: string | null): interface_dragOver {
   return {
     type: DRAG_OVER,
     droppableId
