@@ -23,14 +23,15 @@ export default function Block({id, shape}: Props): ReactElement {
 
 
 const BLOCK = styled.div<{isDragging: boolean, shape?: SHAPE}>`
-  width: ${props => props.shape === 'circle' ? '100px' : '150px' };
-  height: ${props => props.shape === 'rectangle' ? '250px' : props.shape === 'circle' ? '100px' : '150px'};
+  width: ${props => props.shape === 'rectangle' ? '250px' : props.shape === 'circle' ? '100px' : '150px'};
+  height: ${props => props.shape === 'circle' ? '100px' : '150px' };
   border-radius: ${props => props.shape === 'circle' ? '75px' : '25px'};
   background-color: white;
 
   border: 3px solid rgba(0,0,0,0);
 
-  margin: 0.5rem;
+  margin: 10px 12px 8px;
+  /* margin: 10px 12px 8px 6px; */
 
   cursor: ${props => props.isDragging ? 'grabbing' : 'grab'};
 

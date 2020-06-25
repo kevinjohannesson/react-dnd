@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setHover, dragStart, dragEnd } from '../redux/dragDrop/actions';
 import { getDroppables, getDraggableById } from '../redux/dragDrop/selectors';
 import { Idestination } from '../redux/dragDrop/dragDrop.d';
+import styled from 'styled-components';
 
 
 interface Props {
@@ -15,6 +16,8 @@ const Draggable = ({draggableId, children}: Props) => {
   const dispatch = useDispatch();
   
   const ref = React.createRef<HTMLDivElement>();
+
+  const placeholderRef = React.createRef<HTMLDivElement>();
 
   const draggable = useSelector(getDraggableById(draggableId));
 
@@ -111,16 +114,27 @@ const Draggable = ({draggableId, children}: Props) => {
     if(ref.current){
       const DOMRect = ref.current.getBoundingClientRect();
       
+      const margin = window.getComputedStyle(ref.current, null).getPropertyValue("margin");
+      // const computedMargin = window.getComputedStyle(ref.current, null).getPropertyValue("margin");
+      // const marginValues = computedMargin.match(/-?\d+/g);  
+      // const margin = {
+      //   top: marginValues ? parseInt(marginValues[0]) : 0,
+      //   right: marginValues ? parseInt(marginValues[1] || marginValues[0]) : 0,
+      //   bottom: marginValues ? parseInt(marginValues[2] || marginValues[0]) : 0,
+      //   left: marginValues ? parseInt(marginValues[3] || marginValues[1] || marginValues[0]) : 0,
+      // }
+
       const data = {
           id: draggableId,
           height: DOMRect.height,
           width: DOMRect.width,
           x: DOMRect.x,
-          y: DOMRect.y
+          y: DOMRect.y,
+          margin
       }
       
       destination.current = data;
-      
+
       dispatch(dragStart(data))
     }
   }, [dispatch, ref, draggableId]);
@@ -141,6 +155,73 @@ const Draggable = ({draggableId, children}: Props) => {
     if(draggable && draggable.id === draggableId) {
       const element = ref.current;
       if(element){
+        // console.log(draggable);
+        // console.dir(element);
+        // console.dir(element.getBoundingClientRect());
+        // console.log(element.offsetLeft - element.scrollLeft + element.clientLeft)
+        // const translation = element.style.transform.match(/-?\d+/g)
+        // const marginProperty = window.getComputedStyle(element, null).getPropertyValue("margin");
+        // const cssMargin = marginProperty.match(/-?\d+/g);
+        // console.log(cssMargin);
+        
+        // const margin = {
+        //   top: 0,
+        //   right: 0,
+        //   bottom: 0,
+        //   left: 0,
+        // }
+        // if(cssMargin){
+        //   switch(cssMargin.length){
+        //     case 1: {
+        //       margin.top = parseInt(cssMargin[0]);
+        //       margin.right = parseInt(cssMargin[0]);
+        //       margin.bottom = parseInt(cssMargin[0]);
+        //       margin.left = parseInt(cssMargin[0]);
+        //       break;
+        //     }
+        //     case 2: {
+        //       margin.top = parseInt(cssMargin[0]);
+        //       margin.right = parseInt(cssMargin[1]);
+        //       margin.bottom = parseInt(cssMargin[0]);
+        //       margin.left = parseInt(cssMargin[1]);
+        //       break;
+        //     }
+        //     case 3: {
+        //       margin.top = parseInt(cssMargin[0]);
+        //       margin.right = parseInt(cssMargin[1]);
+        //       margin.bottom = parseInt(cssMargin[2]);
+        //       margin.left = parseInt(cssMargin[1]);
+        //       break;
+        //     }
+        //     case 4: {
+        //       margin.top = parseInt(cssMargin[0]);
+        //       margin.right = parseInt(cssMargin[1]);
+        //       margin.bottom = parseInt(cssMargin[2]);
+        //       margin.left = parseInt(cssMargin[3]);
+        //       break;
+        //     }
+        //   }
+        // }
+
+        // console.log(margin)
+        // const root = document.getElementById('root');
+        // const clone = element.cloneNode(false) as HTMLDivElement;
+        // // const placeholder = <div style={{backgroundColor: 'green', height: draggable.height + 'px', width: draggable.width + 'px'}}/>
+        // // const placeholder = React.createElement('div', {style:{height: draggable.height + 'px', width: draggable.width + 'px', backgroundColor: 'green'}})
+        // const placeholder = document.createElement('div');
+        // placeholder.style.height = draggable.height + 'px';
+        // placeholder.style.width = draggable.width + 'px';
+        // placeholder.style.margin = marginProperty;
+        // placeholder.style.border = '2px dashed white';
+        // placeholder.style.backgroundColor = 'rgba(255,255,255,0.3)';
+        // placeholder.style.borderRadius = '25px';
+
+        // element.style.top = draggable.y-margin.top + 'px';
+        // element.style.left = draggable.x-margin.left + 'px';
+        // element.style.position = 'absolute';
+        // const parent = element.parentElement;
+        // parent?.insertBefore((placeholder), element);
+        // root?.appendChild(element);
         document.addEventListener('mousemove', handleMouseMove);
         document.addEventListener('mouseup', handleMouseUp);
       }
@@ -166,7 +247,20 @@ const Draggable = ({draggableId, children}: Props) => {
   )
 };
 
-export default Draggable
+export default Draggable;
+
+const PLACEHOLDER = styled.div<{height: number, width: number}>`
+  width: ${props => props.width + 'px'};
+  height: ${props => props.height + 'px'};
+  background-color: rgba(255,255,255,0.3);
+  border: 3px dashed white;
+
+  border-radius: ${props => props.height/10 + 'px'};
+
+  pointer-events: none;
+
+  transition: width, height, 0.1s ease;
+`;
 
 const getMouseInformation = (event: MouseEvent) => {
   return {

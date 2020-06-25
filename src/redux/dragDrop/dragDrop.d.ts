@@ -14,6 +14,7 @@ export interface draggableData {
     width: number;
     x: number;
     y: number;
+    margin: string;
 }
 
 export interface Idestination {

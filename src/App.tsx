@@ -12,13 +12,23 @@ function App() {
   
   return (
     <React.Fragment>
-      
-        <CONTAINER>
+      {/* <Droppable droppableId="anotherID">
           {
-            (['rectangle','square','circle'] as SHAPE[]).map(shape => 
+            (droppableData: any) => {
+              // console.log(droppableData)
+              return ( */}
+        <CONTAINER
+          // ref={droppableData.ref}
+        >
+          {
+            (['square','rectangle','circle'] as SHAPE[]).map(shape => 
               <Block key={shape} id={shape} shape={shape}/>)
           }
+          {/* {droppableData.placeholder} */}
         </CONTAINER>
+           {/* )}
+          }
+        </Droppable> */}
         
         <Droppable droppableId="uniqueID">
           {
@@ -45,6 +55,7 @@ export default App;
 
 const CONTAINER = styled.div`
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
 
