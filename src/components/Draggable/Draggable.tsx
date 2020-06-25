@@ -1,23 +1,27 @@
 import React, { useEffect, useCallback, useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
-import { setHover, dragStart, dragEnd } from '../redux/dragDrop/actions';
-import { getDroppables, getDraggableById } from '../redux/dragDrop/selectors';
-import { Idestination } from '../redux/dragDrop/dragDrop.d';
-import styled from 'styled-components';
+import { setHover, dragStart, dragEnd } from '../../redux/dragDrop/actions';
+import { getDroppables, getDraggableById, userIsDragging } from '../../redux/dragDrop/selectors';
+import { Idestination } from '../../redux/dragDrop/dragDrop';
+// import styled from 'styled-components';
+import mouseMove from './mouseMove';
 
 
 interface Props {
   children: any;
-  draggableId: string
+  draggableId: string;
+  draggableIndex: number;
 }
 
-const Draggable = ({draggableId, children}: Props) => {
+const Draggable = ({draggableId, draggableIndex, children}: Props) => {
   // console.log(`%cDraggable ${draggableId}`, 'color: white; background-color: green; padding: 1rem;');
   const dispatch = useDispatch();
   
   const ref = React.createRef<HTMLDivElement>();
 
-  const placeholderRef = React.createRef<HTMLDivElement>();
+  // const placeholderRef = React.createRef<HTMLDivElement>();
+
+  const isDragging = useSelector(userIsDragging);
 
   const draggable = useSelector(getDraggableById(draggableId));
 
@@ -29,14 +33,15 @@ const Draggable = ({draggableId, children}: Props) => {
 
   const handleMouseMove = useCallback( (event: MouseEvent) => {
     // console.log('onMouseMove');
+    mouseMove();
     if(ref.current){
       const mouse = getMouseInformation(event);
       translateElement(ref.current, mouse.movement);
 
       const elements = document.elementsFromPoint(event.clientX, event.clientY);
-      
+      console.log(elements)
       if(elements.length !== 0){
-        const droppable = droppables.find(droppable => (elements[1] as HTMLDivElement).hasAttribute('data-droppableId'));
+        const droppable = droppables.find(droppable => (elements[0] as HTMLDivElement).hasAttribute('data-droppableId'));
       
         if(droppable){
           if(hoveredDroppable.current !== droppable){
@@ -67,6 +72,8 @@ const Draggable = ({draggableId, children}: Props) => {
           element.style.transition = '';
           element.style.transform = '';
           element.style.zIndex = '';
+
+          element.style.position = '';
           element.removeEventListener('transitionend', handleTransitionEnd);
           dispatch(dragEnd());
         }
@@ -104,7 +111,7 @@ const Draggable = ({draggableId, children}: Props) => {
       
       element.style.transition = `transform ${0.1 + (time > 1 ? 1 : time)/2}s ease`;
       element.style.transform = `translate(${translation.x}px, ${translation.y}px)`;
-
+      
     }
   }
   }, [handleMouseMove, ref, dispatch, draggable, destination]);
@@ -126,6 +133,7 @@ const Draggable = ({draggableId, children}: Props) => {
 
       const data = {
           id: draggableId,
+          index: draggableIndex,
           height: DOMRect.height,
           width: DOMRect.width,
           x: DOMRect.x,
@@ -137,7 +145,7 @@ const Draggable = ({draggableId, children}: Props) => {
 
       dispatch(dragStart(data))
     }
-  }, [dispatch, ref, draggableId]);
+  }, [dispatch, ref, draggableId, draggableIndex]);
 
   useEffect(() => {
     const element = ref.current
@@ -155,73 +163,20 @@ const Draggable = ({draggableId, children}: Props) => {
     if(draggable && draggable.id === draggableId) {
       const element = ref.current;
       if(element){
-        // console.log(draggable);
-        // console.dir(element);
-        // console.dir(element.getBoundingClientRect());
-        // console.log(element.offsetLeft - element.scrollLeft + element.clientLeft)
-        // const translation = element.style.transform.match(/-?\d+/g)
-        // const marginProperty = window.getComputedStyle(element, null).getPropertyValue("margin");
-        // const cssMargin = marginProperty.match(/-?\d+/g);
-        // console.log(cssMargin);
+        const margin = draggable.margin.match(/-?\d+/g);  
+        const marginValues = {
+          top: margin ? parseInt(margin[0]) : 0,
+          right: margin ? parseInt(margin[1] || margin[0]) : 0,
+          bottom: margin ? parseInt(margin[2] || margin[0]) : 0,
+          left: margin ? parseInt(margin[3] || margin[1] || margin[0]) : 0,
+        }
         
-        // const margin = {
-        //   top: 0,
-        //   right: 0,
-        //   bottom: 0,
-        //   left: 0,
-        // }
-        // if(cssMargin){
-        //   switch(cssMargin.length){
-        //     case 1: {
-        //       margin.top = parseInt(cssMargin[0]);
-        //       margin.right = parseInt(cssMargin[0]);
-        //       margin.bottom = parseInt(cssMargin[0]);
-        //       margin.left = parseInt(cssMargin[0]);
-        //       break;
-        //     }
-        //     case 2: {
-        //       margin.top = parseInt(cssMargin[0]);
-        //       margin.right = parseInt(cssMargin[1]);
-        //       margin.bottom = parseInt(cssMargin[0]);
-        //       margin.left = parseInt(cssMargin[1]);
-        //       break;
-        //     }
-        //     case 3: {
-        //       margin.top = parseInt(cssMargin[0]);
-        //       margin.right = parseInt(cssMargin[1]);
-        //       margin.bottom = parseInt(cssMargin[2]);
-        //       margin.left = parseInt(cssMargin[1]);
-        //       break;
-        //     }
-        //     case 4: {
-        //       margin.top = parseInt(cssMargin[0]);
-        //       margin.right = parseInt(cssMargin[1]);
-        //       margin.bottom = parseInt(cssMargin[2]);
-        //       margin.left = parseInt(cssMargin[3]);
-        //       break;
-        //     }
-        //   }
-        // }
-
-        // console.log(margin)
-        // const root = document.getElementById('root');
-        // const clone = element.cloneNode(false) as HTMLDivElement;
-        // // const placeholder = <div style={{backgroundColor: 'green', height: draggable.height + 'px', width: draggable.width + 'px'}}/>
-        // // const placeholder = React.createElement('div', {style:{height: draggable.height + 'px', width: draggable.width + 'px', backgroundColor: 'green'}})
-        // const placeholder = document.createElement('div');
-        // placeholder.style.height = draggable.height + 'px';
-        // placeholder.style.width = draggable.width + 'px';
-        // placeholder.style.margin = marginProperty;
-        // placeholder.style.border = '2px dashed white';
-        // placeholder.style.backgroundColor = 'rgba(255,255,255,0.3)';
-        // placeholder.style.borderRadius = '25px';
-
-        // element.style.top = draggable.y-margin.top + 'px';
-        // element.style.left = draggable.x-margin.left + 'px';
-        // element.style.position = 'absolute';
-        // const parent = element.parentElement;
-        // parent?.insertBefore((placeholder), element);
-        // root?.appendChild(element);
+        element.style.top = draggable.y-marginValues.top + 'px';
+        element.style.left = draggable.x-marginValues.left + 'px';
+        element.style.position = 'fixed';
+        element.style.userSelect= 'none';
+        element.style.pointerEvents = "";
+        
         document.addEventListener('mousemove', handleMouseMove);
         document.addEventListener('mouseup', handleMouseUp);
       }
@@ -232,7 +187,24 @@ const Draggable = ({draggableId, children}: Props) => {
         }
       }
     }
-  }, [handleMouseMove, handleMouseUp, ref, draggableId, draggable])
+  }, [handleMouseMove, handleMouseUp, ref, draggableId, draggableIndex, draggable])
+
+
+  useEffect(()=>{
+    const element = ref.current;
+    if(isDragging && element){
+      console.log(element);
+      element.style.pointerEvents = 'none';
+      element.style.userSelect = 'none';
+    }
+    return () => {
+      if(isDragging && element){
+        console.log('cleanup')
+        element.style.pointerEvents = '';
+        element.style.userSelect = '';
+      }
+    }
+  },[isDragging, ref])
 
 
   const draggableData = {
@@ -249,18 +221,18 @@ const Draggable = ({draggableId, children}: Props) => {
 
 export default Draggable;
 
-const PLACEHOLDER = styled.div<{height: number, width: number}>`
-  width: ${props => props.width + 'px'};
-  height: ${props => props.height + 'px'};
-  background-color: rgba(255,255,255,0.3);
-  border: 3px dashed white;
+// const PLACEHOLDER = styled.div<{height: number, width: number}>`
+//   width: ${props => props.width + 'px'};
+//   height: ${props => props.height + 'px'};
+//   background-color: rgba(255,255,255,0.3);
+//   border: 3px dashed white;
 
-  border-radius: ${props => props.height/10 + 'px'};
+//   border-radius: ${props => props.height/10 + 'px'};
 
-  pointer-events: none;
+//   pointer-events: none;
 
-  transition: width, height, 0.1s ease;
-`;
+//   transition: width, height, 0.1s ease;
+// `;
 
 const getMouseInformation = (event: MouseEvent) => {
   return {

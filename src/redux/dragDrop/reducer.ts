@@ -50,8 +50,6 @@ export default function reducer(
       else return state;
     }
 
-
-
     default: {
       return state;
     }

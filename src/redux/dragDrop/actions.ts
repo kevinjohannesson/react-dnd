@@ -7,7 +7,7 @@ import {
   IdragStart,
   DRAG_START,
   IdragEnd,
-  DRAG_END} from "./dragDrop.d"
+  DRAG_END,} from "./dragDrop.d"
 
 export function dragStart(draggable: draggableData): IdragStart {
   return {
@@ -35,4 +35,3 @@ export function addDroppable( droppableId: string): IaddDroppable {
     droppableId
   }
 }
-
