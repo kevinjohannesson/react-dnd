@@ -18,6 +18,11 @@ export interface draggableData {
     margin: string;
 }
 
+export interface vector {
+  x: number;
+  y: number;
+}
+
 export interface Idestination {
   x: number;
   y: number;
@@ -51,7 +56,12 @@ interface IaddDroppable extends Action {
   droppableId: string;
 }
 
-export type DragDropActions = IaddDroppable | IsetHover | IdragStart | IdragEnd;
+interface IdragOver extends Action {
+  type: typeof DRAG_OVER;
+  droppableId: string | null;
+}
+
+export type DragDropActions = IaddDroppable | IsetHover | IdragStart | IdragEnd | IdragOver;
 
 export const SET_DESTINATION = "SET_DESTINATION";
 
@@ -61,3 +71,6 @@ export const SET_HOVER = "SET_HOVER";
 
 export const DRAG_START = "DRAG START";
 export const DRAG_END = "DRAG_END";
+
+export const DRAG_OVER = "SET_DRAG_OVER";
+

@@ -7,6 +7,7 @@ import './App.css';
 import Droppable from './components/Droppable/Droppable';
 import Block, {SHAPE} from './components/test_components/Block';
 
+const shapes: SHAPE[] = ['square','rectangle','circle'];
 
 function App() {
   
@@ -25,7 +26,7 @@ function App() {
                   isHovered={droppableData.isHovered}
                 >
               {
-                (['square','rectangle','circle'] as SHAPE[]).map((shape, index) => 
+                shapes.map((shape, index) => 
                     <Block key={shape} id={shape} shape={shape} index={index}/>)
               }
               {droppableData.placeholder}

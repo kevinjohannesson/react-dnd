@@ -31,7 +31,7 @@ const BLOCK = styled.div<{isDragging: boolean, shape?: SHAPE}>`
 
   border: 3px solid rgba(0,0,0,0);
 
-  margin: 10px 12px 8px;
+  margin: 10px;
   /* margin: 10px 12px 8px 6px; */
 
   flex: 0 0 auto;

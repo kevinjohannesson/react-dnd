@@ -1,6 +1,6 @@
 import React, { ReactElement, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { userIsDragging, getHoverId, getDroppables, getDraggable } from '../../redux/dragDrop/selectors';
+import { isUserDragging, getHoverId, getDroppables, getDraggable } from '../../redux/dragDrop/selectors';
 import { addDroppable } from '../../redux/dragDrop/actions';
 import styled from 'styled-components';
 
@@ -12,7 +12,7 @@ interface Props {
 export default function Droppable({droppableId, children}: Props): ReactElement {
   // console.log('%cDroppable', 'color: white; background-color: orange; padding: 1rem;');
   
-  const isDragging = useSelector(userIsDragging);
+  const isDragging = useSelector(isUserDragging);
   
   const currentHoverId = useSelector(getHoverId);
 
@@ -50,16 +50,16 @@ export default function Droppable({droppableId, children}: Props): ReactElement 
 
   useEffect(()=>{
     if(draggable && placeholderRef.current){
-      const placeholder = placeholderRef.current;
-      const parent = placeholder.parentElement;
-      if(parent){
-        placeholder.style.width = draggable.width + 'px';
-        placeholder.style.height = draggable.height + 'px';
-        placeholder.style.margin = draggable.margin;
+      // const placeholder = placeholderRef.current;
+      // const parent = placeholder.parentElement;
+      // if(parent){
+      //   placeholder.style.width = draggable.width + 'px';
+      //   placeholder.style.height = draggable.height + 'px';
+      //   placeholder.style.margin = draggable.margin;
 
-        parent.insertBefore(placeholder, parent.childNodes[draggable.index+1]);
-        console.log('hallo world')
-      }
+      //   parent.insertBefore(placeholder, parent.childNodes[draggable.index+1]);
+      //   // console.log('hallo world')
+      // }
       // console.log(placeholderRef.current.parentElement)
 
     }
@@ -102,7 +102,7 @@ const PLACEHOLDER = styled.div<{height: number, width: number, isHovered: boolea
 
   user-select: none;
 
-  transition: width, height, 10.1s ease;
+  transition: width, height, 0.1s ease;
 `
 
 interface IdroppableData {
