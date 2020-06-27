@@ -5,8 +5,8 @@ export default function filterMouseData(event: MouseEvent) {
         y: event.movementY,
       },
       position: {
-        x: event.screenX,
-        y: event.screenY
+        x: event.clientX,
+        y: event.clientY
       }
     };
 };

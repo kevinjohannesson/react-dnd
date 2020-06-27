@@ -1,22 +1,26 @@
 import { draggableData } from "../../redux/dragDrop/dragDrop";
 
-export default function extractElement(element: HTMLElement, data: draggableData) {
-  const margin = data.margin.match(/-?\d+/g);  
-  const marginValues = {
-    top: margin ? parseInt(margin[0]) : 0,
-    right: margin ? parseInt(margin[1] || margin[0]) : 0,
-    bottom: margin ? parseInt(margin[2] || margin[0]) : 0,
-    left: margin ? parseInt(margin[3] || margin[1] || margin[0]) : 0,
-  }
-  
-  element.style.pointerEvents = '';
-  
-  element.style.top = data.y - marginValues.top + 'px';
-  element.style.left = data.x - marginValues.left + 'px';
-  element.style.position = 'fixed';
-  element.style.zIndex = '5000';
+export default function extractElement(
+    element: HTMLElement, 
+    data: draggableData
+  ){
 
-  // console.log('hallo');
-  // const clone = element.cloneNode(true)
-  // document.getElementById('root')?.appendChild(clone);
+  // element.style.top = data.y - data.margin.top + 'px';
+  // element.style.left = data.x - data.margin.left + 'px';
+
+  element.style.left = (data.cursorPosition.x - data.margin.left - (data.width/2) ) + 'px';
+  element.style.top = (data.cursorPosition.y - data.margin.top - (data.height/2)) + 'px';
+  element.style.zIndex = '5000';
+  element.style.position = 'fixed';
+  
+  // requestAnimationFrame(()=>{
+  //   const resetTransition = () => {
+  //     element.style.transition = '';
+  //     element.removeEventListener('transitionend', resetTransition);
+  //   };
+  //   element.addEventListener('transitionend', resetTransition);
+  //   // element.style.transition = 'top, left, 0.03s ease';
+  //   element.style.left = (data.cursorPosition.x - data.margin.left - (data.width/2) ) + 'px';
+  //   element.style.top = (data.cursorPosition.y - data.margin.top - (data.height/2)) + 'px';
+  // });
 }

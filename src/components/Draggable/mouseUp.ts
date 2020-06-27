@@ -1,8 +1,8 @@
 import { vector } from "../../redux/dragDrop/dragDrop";
 import { Dispatch } from 'react';
 import { dragEnd } from "../../redux/dragDrop/actions";
-import { translateElement } from './translateElement';
-import resetElement from './resetElement';
+
+
 
 export default function mouseUp(
     event: MouseEvent,
@@ -43,13 +43,13 @@ export default function mouseUp(
     };
 
     const handleTransitionEnd = () => {
-      resetElement(element);
+      
       element.removeEventListener('transitionend', handleTransitionEnd);
     }
     element.addEventListener('transitionend', handleTransitionEnd);
     const time = distance / 1000;
     element.style.transition = `top, left, ${0.1 + ((time > 1 ? 1 : time)/3)}s ease`;
-    translateElement(element, translation);
+    // translateElement(element, translation);
     dispatch(dragEnd());
     document.removeEventListener('mouseup', mouseUpHandler);
   }

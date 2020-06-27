@@ -1,7 +1,5 @@
 import { State } from "../redux.d";
 
-export const isUserDragging = (state: State) => state.DragDrop.userIsDragging;
-
 export const isUserDraggingOver = (droppableId: string) => (state: State) => (
   state.DragDrop.dragOverId === droppableId
 )
@@ -18,3 +16,13 @@ export const get_draggableDataById = (draggableId: string) => (state: State) =>
   state.DragDrop.draggableData && state.DragDrop.draggableData.id === draggableId 
   ? state.DragDrop.draggableData 
   : null;
+
+export const select_dragStatus = (state: State) => state.DragDrop.dragStatus;
+
+
+export const select_dragOverId = (state: State) => state.DragDrop.dragOverId;
+export const is_dragOverId = (droppableId: string) => (state: State) => (
+  state.DragDrop.dragOverId === droppableId
+);
+
+export const select_dropPosition = (state: State) => state.DragDrop.dropPosition;
