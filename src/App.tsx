@@ -5,8 +5,8 @@ import Droppable, { interface_droppableData } from './components/Droppable/Dropp
 import Block, {SHAPE} from './components/test_components/Block';
 
 // const shapes: SHAPE[] = ['square','rectangle','circle'];
-// const shapes: SHAPE[] = ['square','rectangle'];
-const shapes: SHAPE[] = ['square'];
+const shapes: SHAPE[] = ['square','rectangle'];
+// const shapes: SHAPE[] = ['square'];
 
 function App() {
   
@@ -98,6 +98,7 @@ const DROPAREA = styled.div<{
   ${props => props.position || ''}
 
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
 

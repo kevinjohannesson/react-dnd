@@ -1,4 +1,4 @@
-import { I_DragDropState, DRAG_ACTIVE, DRAG_STOP, DRAG_INIT, DRAG_INACTIVE, SET_DROP_POSITION, SET_HOVER, Actions } from "./dragDrop.d";
+import { I_DragDropState, DRAG_ACTIVE, DRAG_STOP, DRAG_INIT, DRAG_INACTIVE, SET_DROP_POSITION, SET_HOVER, Actions, DRAG_FINISH } from "./dragDrop.d";
 import { initialState } from "./initial_state";
 
 
@@ -43,6 +43,13 @@ export default function reducer(
         ...state,
         status: 'stop',
         dragStopReason: action.dragStopReason || null
+      }
+    }
+
+    case DRAG_FINISH: {
+      return {
+        ...state,
+        status: 'finish',
       }
     }
 

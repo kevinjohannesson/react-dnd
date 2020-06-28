@@ -28,6 +28,7 @@ const Draggable = ({draggableId, draggableIndex, onDragEnd, children}: Props) =>
   const ref = React.createRef<HTMLElement | null>();
 
   const dragStatus = useSelector(select_status);
+  const status = useSelector(select_status);
   const draggableData = useSelector(select_draggableData);
   const dropPosition = useSelector(select_dropPosition);
   const dragEndReason = useSelector(select_dragEndReason);
@@ -35,12 +36,22 @@ const Draggable = ({draggableId, draggableIndex, onDragEnd, children}: Props) =>
   const hoverId = useRef<string | null>(null);
   const userIsDraggingThis = (draggableData && draggableData.id === draggableId) || false;
   
+  
+  const status_inactive = useRef(false);
+  const status_init = useRef(false);
+  const status_active = useRef(false);
+  const status_stop = useRef(false);
+  const status_finish = useRef(false);
+  
   const mouseDownListener = useRef(false);
   const mouseMoveListener = useRef(false);
   const mouseUpListener = useRef(false);
+  
+  const elementIsExtracted = useRef(false);
 
   useEffect(() => {
     const element = ref.current;
+    
     const handleMouseDown = (event: MouseEvent) => {
       if(element){
         mouseDownListener.current = false;
@@ -63,13 +74,11 @@ const Draggable = ({draggableId, draggableIndex, onDragEnd, children}: Props) =>
     }
     const handleMouseUp = (event: MouseEvent) => {
       if(element){
-        // element.style.pointerEvents = 'none';
-        // element.setAttribute('style', '');
-        // elementIsExtracted.current = false;
-
+        //Remove pointerEvents to prevent "catching" the draggable with a fast mouse click during state change.
+        element.style.pointerEvents = 'none';
+        //Remove this eventListener and update the local shadowState.
         document.removeEventListener('mousemove', handleMouseMove);
         mouseMoveListener.current = false;
-        document.removeEventListener('mouseup', handleMouseUp);
         mouseUpListener.current = false;
         dispatch(updateState('stop', hoverId.current ? 'drop' : 'cancel'));
       }
@@ -77,38 +86,62 @@ const Draggable = ({draggableId, draggableIndex, onDragEnd, children}: Props) =>
     
     if(element){
       if(element.style.userSelect !== 'none') element.style.userSelect = 'none';
-      if(dragStatus === 'inactive' && !mouseDownListener.current){
-        element.style.pointerEvents = '';
-        element.addEventListener('mousedown', handleMouseDown, {once: true});
-        mouseDownListener.current = true;
-      } else {
-        if(draggableData){
-          switch(dragStatus){
-            case 'init': {
-              if(!userIsDraggingThis) blockEvents(element);
-              extractElement(element, draggableData);
-              dispatch(updateState('active'));
-              break;
+      // console.log(status)
+      switch(status){
+        case 'inactive': {
+          if(!status_inactive.current){
+            if(!mouseDownListener.current){
+              element.addEventListener('mousedown', handleMouseDown, {once: true});
+              mouseDownListener.current = true;
             }
-            case 'active': {
+            if(mouseDownListener) {
+              if(element.style.pointerEvents !== '') element.style.pointerEvents = '';
+              status_finish.current = false;
+              status_inactive.current = true;
+            }
+          }
+          break;
+        }
+        case 'init': {
+          if(!status_init.current){
+            if(userIsDraggingThis && draggableData){
+              if(!elementIsExtracted.current){
+                extractElement(element, draggableData);
+                elementIsExtracted.current = true;
+              }
               if(!mouseMoveListener.current){
                 document.addEventListener('mousemove', handleMouseMove);
                 mouseMoveListener.current = true;
               }
               if(!mouseUpListener.current){
-                document.addEventListener('mouseup', handleMouseUp);
+                document.addEventListener('mouseup', handleMouseUp, {once: true});
                 mouseUpListener.current = true;
               }
-              break;
+              if(elementIsExtracted && mouseMoveListener.current && mouseUpListener.current){
+                status_init.current = true; 
+                dispatch(updateState('active'));
+              }
             }
-            case 'stop': {
+            else if(!userIsDraggingThis){
+              blockEvents(element);
+              status_init.current = true; 
+            }
+          }
+          break;
+        }
+        case 'active': {
+          //
+          break;
+        }
+        case 'stop': {
+          if(!status_stop.current){
+            if(userIsDraggingThis && draggableData){
               switch(dragEndReason){
                 case 'drop': {
                   if(dropPosition){
-                    console.log('%cecho!', 'background-color: yellow; color: black; padding: 4px;');
                     element.style.left = (dropPosition.x - draggableData.margin.left) + 'px';
                     element.style.top = (dropPosition.y - draggableData.margin.top) + 'px';
-                    dispatch(updateState('inactive'));
+                    dispatch(updateState('finish'));
                     break;
                   }
                 }
@@ -116,19 +149,41 @@ const Draggable = ({draggableId, draggableIndex, onDragEnd, children}: Props) =>
                 case 'cancel': {
                   element.style.left = (draggableData.x - draggableData.margin.left) + 'px';
                   element.style.top = (draggableData.y - draggableData.margin.top) + 'px';
-                  dispatch(updateState('inactive'));
+                  dispatch(updateState('finish'));
                   break;
                 }
               }
               if(onDragEnd) onDragEnd();
-              break;
+              status_stop.current = true;
             }
           }
+          break;
+        }
+        case 'finish': {
+          if(!status_finish.current){
+            // element.style.pointerEvents = 'none';
+            // element.setAttribute('style', '');
+            // elementIsExtracted.current = false;
+
+            
+            
+            status_inactive.current = false;
+            status_init.current = false;
+            status_active.current = false;
+            status_stop.current = false;
+
+            if(userIsDraggingThis){
+              dispatch(updateState('inactive'));
+            }
+            status_finish.current = true;
+          }
+          break;
         }
       }
     }
   }, [
       ref, 
+      status,
       dragStatus,
       draggableData,
       userIsDraggingThis,

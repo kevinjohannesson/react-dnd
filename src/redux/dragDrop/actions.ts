@@ -13,6 +13,7 @@ import {
   T_status,
   T_action,
   dragStopReasons,
+  DRAG_FINISH,
 } from "./dragDrop.d"
 
 type T_updateType = T_status| 'hover' | 'drop_position';
@@ -23,6 +24,7 @@ const updateType: {[key in T_updateType]: T_action} = {
   'hover': SET_HOVER,
   'drop_position': SET_DROP_POSITION,
   'stop': DRAG_STOP,
+  'finish': DRAG_FINISH,
   'inactive': DRAG_INACTIVE,
 }
 
