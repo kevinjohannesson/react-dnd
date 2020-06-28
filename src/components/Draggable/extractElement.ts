@@ -1,8 +1,8 @@
-import { draggableData } from "../../redux/dragDrop/dragDrop";
+import { I_draggableData } from "../../redux/dragDrop/dragDrop";
 
 export default function extractElement(
     element: HTMLElement, 
-    data: draggableData
+    data: I_draggableData
   ){
 
   // element.style.top = data.y - data.margin.top + 'px';

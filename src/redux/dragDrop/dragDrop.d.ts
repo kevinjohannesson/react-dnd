@@ -1,20 +1,27 @@
 import { Action } from 'redux';
 
-export interface vector {
+export interface T_vector {
   x: number;
   y: number;
 };
 
-type dragStatus = null | 'init' | 'active' | 'drop' | 'cancel' | 'clear';
+export const dragStopReasons = ['drop', 'cancel'] as const;
+export type T_dragStopReason = typeof dragStopReasons[number];
 
-export interface DragDropState {
-  dragStatus: dragStatus;
-  draggableData: draggableData | null;
-  dragOverId: string | null;
-  dropPosition: vector | null;
-};
+export const statuses = ['inactive', 'init', 'active', 'stop'] as const;
+export type T_status = typeof statuses[number];
 
-export interface draggableData {
+type T_hoverId = string | null;
+
+export interface I_DragDropState {
+  status: T_status;
+  draggableData: I_draggableData | null;
+  hoverId: T_hoverId;
+  dragStopReason: T_dragStopReason | null;
+  dropPosition: T_vector | null;
+}
+
+export interface I_draggableData {
     id: string;
     index: number;
     height: number;
@@ -31,46 +38,29 @@ export interface draggableData {
     cursorPosition: vector;
 }
 
-interface dragInit extends Action {
-  type: typeof DRAG_INIT;
-  draggableData: draggableData; 
-  dragOverId: string | null;
+export const DRAG_INIT = 'DRAG_INIT';
+export const DRAG_ACTIVE = 'DRAG_ACTIVE';
+export const SET_HOVER = 'SET_HOVER';
+export const SET_DROP_POSITION = 'SET_DROP_POSITION';
+export const DRAG_STOP = 'DRAG_STOP';
+export const DRAG_INACTIVE = 'DRAG_INACTIVE';
+
+const actions = [
+  DRAG_INIT, 
+  DRAG_ACTIVE, 
+  SET_HOVER, 
+  SET_DROP_POSITION,
+  DRAG_STOP,
+  DRAG_INACTIVE] as const;
+  
+export type T_action = typeof actions[number];
+
+interface I_updateState extends Action {
+  type: T_action;
+  hoverId?: T_hoverId;
+  draggableData?: I_draggableData;
+  dragStopReason?: T_dragStopReason;
+  dropPosition?: T_vector;
 }
 
-interface dragStart extends Action {
-  type: typeof DRAG_START;
-}
-
-interface dragEnd extends Action {
-  type: typeof DRAG_END;
-}
-
-interface dragFinish extends Action {
-  type: typeof DRAG_FINISH;
-}
-
-interface dragOver extends Action {
-  type: typeof DRAG_OVER;
-  droppableId: string | null;
-}
-
-interface setDropPosition extends Action {
-  type: typeof SET_DROP_POSITION;
-  position: vector;
-}
-
-interface dragClear extends Action {
-  type: typeof DRAG_CLEAR;
-}
-
-export type DragDropActions = dragInit | dragStart | dragEnd | dragFinish | dragOver | setDropPosition | dragClear;
-
-export const DRAG_INIT = "DRAG_INIT";
-export const DRAG_START = "DRAG START";
-export const DRAG_END = "DRAG_END";
-export const DRAG_FINISH = "DRAG_FINISH";
-export const DRAG_CLEAR = "DRAG_CLEAR";
-
-export const DRAG_OVER = "DRAG_OVER";
-
-export const SET_DROP_POSITION = "SET_DROP_POSITION";
+export type Actions = I_updateState

@@ -11,8 +11,13 @@ interface Props {
 export type SHAPE = 'square' | 'rectangle' | 'circle';
 
 export default function Block({id, index, shape}: Props): ReactElement {
+
+  const dragEndHandler = () => {
+    console.log('dragEndHandler');
+  }
+
   return (
-    <Draggable draggableId={id} draggableIndex={index}>
+    <Draggable draggableId={id} draggableIndex={index} onDragEnd={dragEndHandler}>
       {
         (draggableData: any) => 
         {

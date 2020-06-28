@@ -1,74 +1,41 @@
 import { 
   DRAG_INIT,
-  DRAG_START,
-  DRAG_END,
-  DRAG_OVER,
-  DRAG_FINISH,
+  DRAG_ACTIVE,
+  SET_HOVER,
   SET_DROP_POSITION,
-  DRAG_CLEAR,
-  dragClear as interface_dragClear,
-  draggableData as interface_draggableData,
-  dragInit as interface_dragInit,
-  dragStart as interface_dragStart,
-  dragEnd as interface_dragEnd,
-  dragOver as interface_dragOver,
-  dragFinish as interface_dragFinish,
-  setDropPosition as interface_setDropPosition,
-  vector,
-  dragStatus,
+  DRAG_STOP,
+  DRAG_INACTIVE,
+  I_draggableData,
+  I_updateState,
+  T_vector,
+  T_hoverId,
+  T_dragStopReason,
+  T_status,
+  T_action,
+  dragStopReasons,
 } from "./dragDrop.d"
 
-export function dragInit(draggableData: interface_draggableData, dragOverId: string | null): interface_dragInit {
-  return {
-    type: DRAG_INIT,
-    draggableData,
-    dragOverId
-  }
+type T_updateType = T_status| 'hover' | 'drop_position';
+
+const updateType: {[key in T_updateType]: T_action} = {
+  'init': DRAG_INIT,
+  'active': DRAG_ACTIVE,
+  'hover': SET_HOVER,
+  'drop_position': SET_DROP_POSITION,
+  'stop': DRAG_STOP,
+  'inactive': DRAG_INACTIVE,
 }
 
-export function dragStart(): interface_dragStart {
-  return {
-    type: DRAG_START,
+export function updateState(
+    t: T_updateType, 
+    m?: T_hoverId | T_dragStopReason | T_vector | string | null,
+    u?: I_draggableData, 
+  ): I_updateState {
+  return { 
+    type: updateType[t], 
+    hoverId: (typeof m === 'string' ? m : null), 
+    dragStopReason: dragStopReasons.find(reason => m === reason),
+    draggableData: u,
+    dropPosition: (m && typeof m !== 'string' && m.x && m.y && m !== null ? m : undefined)
   }
-}
-
-export function dragEnd(): interface_dragEnd {
-  return {
-    type: DRAG_END
-  }
-}
-
-export function dragFinish(): interface_dragFinish {
-  return {
-    type: DRAG_FINISH
-  }
-}
-
-export function dragOver(droppableId: string | null): interface_dragOver {
-  return {
-    type: DRAG_OVER,
-    droppableId
-  }
-}
-
-export function setDropPosition(position: vector): interface_setDropPosition {
-  return {
-    type: SET_DROP_POSITION,
-    position
-  }
-}
-export function dragClear(): interface_dragClear {
-  return {
-    type: DRAG_CLEAR,
-  }
-}
-
-export function set_dragStatus(status: dragStatus, u?: interface_draggableData, m?: string | null) {
-  const type = (function(){
-    switch(status){
-      case 'init': return dragInit(arguments[1], arguments[2])
-      case 'clear': return DRAG_CLEAR;
-    }
-  })();
-  return {type}
 }

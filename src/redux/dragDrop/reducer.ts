@@ -1,58 +1,59 @@
-import { DragDropState, DragDropActions, DRAG_START, DRAG_END, DRAG_OVER, DRAG_INIT, DRAG_FINISH, SET_DROP_POSITION } from "./dragDrop.d";
+import { I_DragDropState, DRAG_ACTIVE, DRAG_STOP, DRAG_INIT, DRAG_INACTIVE, SET_DROP_POSITION, SET_HOVER, Actions } from "./dragDrop.d";
 import { initialState } from "./initial_state";
 
 
+
 export default function reducer(
-  state: DragDropState = initialState,
-  action: DragDropActions
-) {
+  state: I_DragDropState = initialState,
+  action: Actions
+): I_DragDropState {
   switch (action.type) {
     case DRAG_INIT: {
-      const {draggableData, dragOverId} = action;
       return {
         ...state,
-        dragStatus: 'init',
-        draggableData,
-        dragOverId
+        status: 'init',
+        draggableData: action.draggableData || null,
+        hoverId: action.hoverId || null 
       }
     }
 
-    
-    case DRAG_START: {
+    case DRAG_ACTIVE: {
       return {
         ...state,
-        dragStatus: 'active'
+        status: 'active'
       }
     }
 
-    case DRAG_END: {
+    case SET_HOVER: {
       return {
         ...state,
-        dragStatus: state.dragOverId ? 'drop' : 'cancel'
-      }
-    }
-
-    case DRAG_FINISH: {
-      return {
-        ...state,
-        dragStatus: null,
-        draggableData: null,
-        dragOverId: null,
-        dropPosition: null,
-      }
-    }
-
-    case DRAG_OVER: {
-      return {
-        ...state,
-        dragOverId: action.droppableId
+        hoverId: action.hoverId || null
       }
     }
 
     case SET_DROP_POSITION: {
       return {
         ...state,
-        dropPosition: action.position
+        dropPosition: action.dropPosition || null
+      }
+    }
+
+    case DRAG_STOP: {
+      return {
+        ...state,
+        status: 'stop',
+        dragStopReason: action.dragStopReason || null
+      }
+    }
+
+    case DRAG_INACTIVE: {
+      return {
+        ...state,
+        status: 'inactive',
+        draggableData: null,
+        hoverId: null,
+        dropPosition: null,
+        dragStopReason: null
       }
     }
 

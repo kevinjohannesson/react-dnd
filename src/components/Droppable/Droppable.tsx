@@ -1,9 +1,9 @@
 import React, { ReactElement, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { isUserDraggingOver, select_draggableData, select_dragStatus, is_dragOverId, select_dropPosition } from '../../redux/dragDrop/selectors';
-import styled, { FlattenSimpleInterpolation } from 'styled-components';
-import { draggableData } from '../../redux/dragDrop/dragDrop.d';
-import { setDropPosition } from '../../redux/dragDrop/actions';
+import { select_draggableData, select_status, is_dragOverId, select_dropPosition } from '../../redux/dragDrop/selectors';
+import styled from 'styled-components';
+// import { I_draggableData } from '../../redux/dragDrop/dragDrop.d';
+import { updateState } from '../../redux/dragDrop/actions';
 
 interface Props {
   children: any;
@@ -18,14 +18,14 @@ export default function Droppable({droppableId, placeholderCSS, children}: Props
   const ref = React.createRef<HTMLDivElement>();
   
   // console.log(droppableId)
-  const userIsDraggingOver = useSelector(isUserDraggingOver(droppableId));
+  // const userIsDraggingOver = useSelector(isUserDraggingOver(droppableId));
   // console.log('userIsDraggingOver', userIsDraggingOver)
   const placeholderRef = React.createRef<HTMLDivElement>();
   
   const draggable = useSelector(select_draggableData)
   // const draggable = {height: 100, width: 100}
   
-  const dragStatus = useSelector(select_dragStatus);
+  const dragStatus = useSelector(select_status);
   const userIsDragging = (draggable !== null && dragStatus === 'active');
   console.log(dragStatus);
   const isDragOver = useSelector(is_dragOverId(droppableId));
@@ -51,7 +51,7 @@ export default function Droppable({droppableId, placeholderCSS, children}: Props
       }
       console.log(pos);
       console.log(dropPosition)
-      if(!dropPosition || dropPosition.x !== pos.x || dropPosition.y !== pos.y) dispatch(setDropPosition(pos));
+      if(!dropPosition || dropPosition.x !== pos.x || dropPosition.y !== pos.y) dispatch(updateState('drop_position', pos));
 
     }
 
@@ -70,7 +70,7 @@ export default function Droppable({droppableId, placeholderCSS, children}: Props
 
     }
 
-  }, [ref, droppableId, dragStatus, placeholderRef, userIsDraggingOverThis, userIsDragging]);
+  }, [ref, droppableId, dragStatus, placeholderRef, userIsDraggingOverThis, userIsDragging, dispatch, dropPosition]);
 
   
 

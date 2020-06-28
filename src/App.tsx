@@ -1,5 +1,5 @@
 import React from 'react';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 
 import Droppable, { interface_droppableData } from './components/Droppable/Droppable';
 import Block, {SHAPE} from './components/test_components/Block';

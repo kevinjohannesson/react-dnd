@@ -1,8 +1,9 @@
-import { DragDropState } from "./dragDrop.d";
+import { I_DragDropState } from "./dragDrop.d";
 
-export const initialState: DragDropState = {
-  dragStatus: null,
+export const initialState: I_DragDropState = {
+  status: 'inactive',
   draggableData: null,
-  dragOverId: null,
+  hoverId: null,
   dropPosition: null,
+  dragStopReason: null,
 };

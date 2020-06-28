@@ -1,5 +1,5 @@
-import { DragDropState } from "./dragDrop/dragDrop.d";
+import { I_DragDropState } from "./dragDrop/dragDrop.d";
 
-export type State = {
-  DragDrop: DragDropState;
+export default interface State {
+  DragDrop: I_DragDropState;
 };
