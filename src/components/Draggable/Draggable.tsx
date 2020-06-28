@@ -45,7 +45,7 @@ const Draggable = ({draggableId, draggableIndex, onDragEnd, children}: Props) =>
       if(element){
         mouseDownListener.current = false;
         const draggableData = get_draggableData(event, element, draggableId, draggableIndex);
-        const droppableId = get_hoverId(event);
+        const droppableId = get_hoverId(event, draggableData);
         dispatch(updateState('init', droppableId, draggableData));
       }
     }
@@ -54,7 +54,7 @@ const Draggable = ({draggableId, draggableIndex, onDragEnd, children}: Props) =>
         const position = {x: event.clientX, y: event.clientY};
         element.style.left = (position.x - draggableData.margin.left - (draggableData.width/2) ) + 'px';
         element.style.top = (position.y - draggableData.margin.top - (draggableData.height/2)) + 'px';
-        const droppableId = get_hoverId(event);
+        const droppableId = get_hoverId(event, draggableData);
         if(hoverId.current !== droppableId){
           hoverId.current = droppableId;
           dispatch(updateState('hover', droppableId)); 
@@ -63,6 +63,7 @@ const Draggable = ({draggableId, draggableIndex, onDragEnd, children}: Props) =>
     }
     const handleMouseUp = (event: MouseEvent) => {
       if(element){
+        // element.style.pointerEvents = 'none';
         // element.setAttribute('style', '');
         // elementIsExtracted.current = false;
 
@@ -77,6 +78,7 @@ const Draggable = ({draggableId, draggableIndex, onDragEnd, children}: Props) =>
     if(element){
       if(element.style.userSelect !== 'none') element.style.userSelect = 'none';
       if(dragStatus === 'inactive' && !mouseDownListener.current){
+        element.style.pointerEvents = '';
         element.addEventListener('mousedown', handleMouseDown, {once: true});
         mouseDownListener.current = true;
       } else {
@@ -101,19 +103,19 @@ const Draggable = ({draggableId, draggableIndex, onDragEnd, children}: Props) =>
             }
             case 'stop': {
               switch(dragEndReason){
-                case 'cancel': {
-                  element.style.left = (draggableData.x - draggableData.margin.left) + 'px';
-                  element.style.top = (draggableData.y - draggableData.margin.top) + 'px';
-                  dispatch(updateState('inactive'));
-                  break;
-                }
                 case 'drop': {
                   if(dropPosition){
                     console.log('%cecho!', 'background-color: yellow; color: black; padding: 4px;');
                     element.style.left = (dropPosition.x - draggableData.margin.left) + 'px';
                     element.style.top = (dropPosition.y - draggableData.margin.top) + 'px';
                     dispatch(updateState('inactive'));
+                    break;
                   }
+                }
+                case 'cancel': {
+                  element.style.left = (draggableData.x - draggableData.margin.left) + 'px';
+                  element.style.top = (draggableData.y - draggableData.margin.top) + 'px';
+                  dispatch(updateState('inactive'));
                   break;
                 }
               }

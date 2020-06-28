@@ -27,10 +27,10 @@ export default function Droppable({droppableId, placeholderCSS, children}: Props
   
   const dragStatus = useSelector(select_status);
   const userIsDragging = (draggable !== null && dragStatus === 'active');
-  console.log(dragStatus);
+  // console.log(dragStatus);
   const isDragOver = useSelector(is_dragOverId(droppableId));
   const userIsDraggingOverThis = userIsDragging && isDragOver;
-  console.log(userIsDraggingOverThis)
+  // console.log(userIsDraggingOverThis)
 
   const dropPosition = useSelector(select_dropPosition);
 
@@ -49,8 +49,8 @@ export default function Droppable({droppableId, placeholderCSS, children}: Props
         x: DOMRect.x,
         y: DOMRect.y
       }
-      console.log(pos);
-      console.log(dropPosition)
+      // console.log(pos);
+      // console.log(dropPosition)
       if(!dropPosition || dropPosition.x !== pos.x || dropPosition.y !== pos.y) dispatch(updateState('drop_position', pos));
 
     }
