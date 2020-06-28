@@ -47,23 +47,17 @@ export default function get_hoverId(event: MouseEvent, draggableData: I_draggabl
     const hoverId = (()=>{
 
       for (const vertex in lattice) {
-
-        console.log(vertex)
-        const vector = lattice[vertex];
-        
+        const vector = lattice[vertex];        
         const elementsFromPoint = document.elementsFromPoint(vector.x, vector.y);
-        console.log(elementsFromPoint)
         if(elementsFromPoint.length !== 0){
           const droppable = elementsFromPoint.find(el => el.hasAttribute('data-droppable'));
           if(droppable) return droppable.getAttribute('data-droppable');
         }
       }
       return null
-      
     })()
-    console.log(hoverId)
-    console.log(lattice.middlecenter)
     return hoverId;
+  }
 
   // const elementsFromPoint = document.elementsFromPoint(x, y);
   // console.log(elementsFromPoint);
@@ -80,7 +74,7 @@ export default function get_hoverId(event: MouseEvent, draggableData: I_draggabl
     //   const droppable = elementsFromPoint.find(el => el.hasAttribute('data-droppable')); 
     //   return droppable ? droppable.getAttribute('data-droppable') : null;
     // } else return null;
-  }
+  // }
   // const dot = document.createElement('div');
   // dot.style.position = 'fixed';
   // dot.style.left = x + 'px';

@@ -112,6 +112,7 @@ const Draggable = ({draggableId, draggableIndex, onDragEnd, children}: Props) =>
                     break;
                   }
                 }
+                // eslint-disable-next-line
                 case 'cancel': {
                   element.style.left = (draggableData.x - draggableData.margin.left) + 'px';
                   element.style.top = (draggableData.y - draggableData.margin.top) + 'px';
