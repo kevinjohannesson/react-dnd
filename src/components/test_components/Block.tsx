@@ -18,7 +18,7 @@ export default function Block({id, index, shape}: Props): ReactElement {
         {
           // console.log(draggableData)
           return(
-            <BLOCK ref={draggableData.ref} userIsDraggingThis={draggableData.userIsDraggingThis} shape={shape}><h2>{index}</h2></BLOCK>
+            <BLOCK ref={draggableData.ref} userIsDraggingThis={draggableData.userIsDraggingThis} isHovering={draggableData.isHovering} shape={shape}><h2>{index}</h2></BLOCK>
           )}
       }
     </Draggable>
@@ -40,7 +40,7 @@ export const shake = keyframes`
   100% { transform: translate(1px, -2px) rotate(-1deg); }
 `
 
-const BLOCK = styled.div<{userIsDraggingThis: boolean, shape?: SHAPE}>`
+const BLOCK = styled.div<{userIsDraggingThis: boolean, isHovering?: boolean, shape?: SHAPE}>`
   width: ${props => props.shape === 'rectangle' ? '250px' : props.shape === 'circle' ? '100px' : '150px'};
   height: ${props => props.shape === 'circle' ? '100px' : '150px' };
   border-radius: ${props => props.shape === 'circle' ? '75px' : '25px'};
@@ -64,7 +64,7 @@ const BLOCK = styled.div<{userIsDraggingThis: boolean, shape?: SHAPE}>`
   }
   
   &:active {
-    border: 5px dashed orangered;
+    border: ${props => props.isHovering ? '10px solid blue' : '5px dashed orangered'};
     animation: ${shake} 0.5s ease-in-out 0s infinite;
   }
 `
