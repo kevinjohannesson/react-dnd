@@ -36,11 +36,18 @@ const Draggable = ({draggableId, draggableIndex, children}: Props) => {
   const hasMouseMoveListener = useRef(false);
   const hasMouseUpListener = useRef(false);
   const dragOrigin = useRef<T_vector | null>(null)
-  
+
+  const testRef = useRef<HTMLDivElement | null>(null);
+  if(droppableContext){
+    testRef.current = context.test(draggableId, droppableContext.id).current
+  } else console.error('Unable to locate droppableContext');
   useEffect(()=>{
     if(droppableContext){
       echo('Adding draggable to the context', draggableId, 1);
       context.add_draggable(draggableId, draggableIndex, droppableContext.id, ref);
+
+      // testRef.current = context.test(draggableId, droppableContext.id).current
+      console.log(testRef.current);
     } else {
       console.error('Cannot find droppableContext.');
     } 
@@ -236,7 +243,7 @@ const Draggable = ({draggableId, draggableIndex, children}: Props) => {
   //    ]);
 
   const exportedData = {
-    ref: ref,
+    ref: testRef,
     userIsDraggingThis: isBeingDragged,
   }
 

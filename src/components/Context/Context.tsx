@@ -36,6 +36,7 @@ export interface I_data_droppable {
   id: string;
   ref: React.RefObject<HTMLDivElement>;
   draggables: T_draggables;
+  placeholderRef: React.RefObject<HTMLDivElement>;
   // id: string,
   // type: string,
   // drop_disabled: boolean,
@@ -48,17 +49,19 @@ export interface I_data {
   droppables: {
     [key: string]: I_data_droppable;
   }
-  add_droppable: (id: string, ref: React.RefObject<HTMLDivElement>) => I_data_droppable;
+  add_droppable: (id: string, ref: React.RefObject<HTMLDivElement>, placeholderRef: React.RefObject<HTMLDivElement>) => I_data_droppable;
   add_draggable: (id: string, index: number, droppableId: string, ref: React.RefObject<HTMLDivElement>) => void;
+  test: (id: string, droppableId: string) => React.RefObject<HTMLDivElement>;
 }
 
 const data: I_data = {
   droppables: {},
-  add_droppable: function(id, ref){
+  add_droppable: function(id, ref, placeholderRef){
     this.droppables[id] = {
       ...this.droppables[id],
       id,
       ref,
+      placeholderRef
     }
 
     return this.droppables[id];
@@ -77,7 +80,13 @@ const data: I_data = {
       }
     }
     this.droppables[droppableId] = new_droppable;
+  },
+  test: function(id, droppableId){
+    console.log(id);
+    console.log(droppableId);
+    return React.createRef<HTMLDivElement>()
   }
+  
 };
 
 export const DragDropContext = React.createContext(data);
@@ -113,20 +122,22 @@ export default function Context({children}: Props): ReactElement {
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
     echo(`handleMouseMove`, 'context mousemove');
+    console.log(hoveredDroppableId.current);
+    // console.log(data.droppables)
     // console.log(element.current)
     // console.log('draggableData.current', draggableData.current)
     if(element.current){
       if(draggableData.current){
         if(!elementIsExtracted.current) {
-          echo(`Extracting element`, 'context mousemove', 1);
-          extractElement(element.current, draggableData.current);
-          elementIsExtracted.current = true;
+          if(hoveredDroppableId.current){
+            console.log(data.droppables[hoveredDroppableId.current])
+            echo(`Extracting element`, 'context mousemove', 1);
+            extractElement(element.current, draggableData.current);
+            elementIsExtracted.current = true;
+          } else console.error('hoveredDroppableId.current not found');
         }
         translateElement(e, element.current, draggableData.current);
         const currentHoveredDroppableId = get_hoveredDroppableId(e, draggableData.current, data.droppables);
-        console.log('currentHoveredDroppableId', currentHoveredDroppableId)
-        console.log('hoveredDroppableId', hoveredDroppableId.current)
-        console.log('source', source)
         if(currentHoveredDroppableId !== hoveredDroppableId.current){
           hoveredDroppableId.current = currentHoveredDroppableId;
           echo(`Dispatching dragOver for ${currentHoveredDroppableId}`, 'context mousemove', 2);
@@ -136,7 +147,7 @@ export default function Context({children}: Props): ReactElement {
     } else console.error('Unable to find element.current');
   }, [
     hoveredDroppableId,
-    source,
+    // source,
     dispatch,
   ]);
 
