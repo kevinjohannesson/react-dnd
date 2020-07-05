@@ -11,6 +11,7 @@ import { DragDropContext, I_data_droppable } from '../Context/Context';
 import { useSelector } from 'react-redux';
 import { select_status, 
   // select_hoveredDroppableId, 
+  is_elementExtracted,
   is_hoveredDroppableId } from '../../redux/dragDrop/selectors';
 import echo from '../../echo';
 
@@ -37,6 +38,8 @@ export default function Droppable({droppableId, placeholderCSS, children}: Props
   const context = useContext(DragDropContext);
   const status = useSelector(select_status);
   const isHovered = useSelector(is_hoveredDroppableId(droppableId));
+
+  const elementExtracted = useSelector(is_elementExtracted);
   
   const placeholderRef = React.createRef<HTMLDivElement>();
   
@@ -50,7 +53,7 @@ export default function Droppable({droppableId, placeholderCSS, children}: Props
     // width={userIsDragging && isHovered && draggableData ? draggableData.width : 0} 
     // height={userIsDragging && isHovered && draggableData ? draggableData.height : 0} 
     // margin={userIsDragging && isHovered && draggableData ? draggableData.margin.all : ''} 
-    active={false} 
+    active={elementExtracted} 
     width={0}
     height={0}
     margin={''}

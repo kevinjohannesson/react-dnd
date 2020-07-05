@@ -15,6 +15,10 @@ export const is_hoveredDroppableId = (droppableId: string) => (state: State) => 
 export const userIsDraggingThis = (draggableId: string) => (state: State) => (
   state.DragDrop.draggableId === draggableId
 );
+
+export const is_elementExtracted = (state: State) => (
+  state.DragDrop.elementExtracted
+);
 // export const userIsDraggingDraggable = (draggableId: string) => (state: State) => state.DragDrop.draggableData && state.DragDrop.draggableData.id === draggableId ? true : false
 
 

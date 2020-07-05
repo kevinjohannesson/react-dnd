@@ -65,7 +65,7 @@ const BLOCK = styled.div<{userIsDraggingThis: boolean, isHovering?: boolean, sha
   
   &:active {
     border: ${props => props.isHovering ? '10px solid blue' : '5px dashed orangered'};
-    animation: ${shake} 0.5s ease-in-out 0s infinite;
+    /* animation: ${shake} 0.5s ease-in-out 0s infinite; */
   }
 `
 

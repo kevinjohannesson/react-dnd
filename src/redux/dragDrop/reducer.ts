@@ -8,7 +8,8 @@ import { I_DragDropState,
         Actions,
         DRAG_END,
          DRAG_FINISH, 
-         DRAG_OVER
+         DRAG_OVER,
+         ELEMENT_EXTRACTED
         } from "./dragDrop.d";
 import { initialState } from "./initial_state";
 
@@ -42,6 +43,13 @@ export default function reducer(
       return {
         ...state,
         status: 'active'
+      }
+    }
+
+    case ELEMENT_EXTRACTED: {
+      return {
+        ...state,
+        elementExtracted: action.condition,
       }
     }
     case DRAG_OVER: {

@@ -58,8 +58,13 @@ const Draggable = ({draggableId, draggableIndex, children}: Props) => {
 
   const handleMouseDown = useCallback((e: MouseEvent) => {
     echo('handleMouseDown', draggableId+'mouseDown');
+    
+    // document.body.style.border = '10px solid blue';
     if(droppableContext){
       if(ref.current){
+        echo(`Setting cursor to grabbing for document.body`, draggableId, 2);
+        ref.current.style.cursor = '';
+        document.body.style.cursor = 'grabbing';
         // echo('Calculating draggable data for:', draggableId+'mouseDown', 1);
         // console.dir(ref.current);
         // const draggableData = get_draggableData(ref.current);
@@ -70,6 +75,7 @@ const Draggable = ({draggableId, draggableIndex, children}: Props) => {
         echo('Dispatching dragInit', draggableId+'mouseDown', 1);
         dispatch(dragInit(droppableContext.id, draggableId));
         hasMouseDownListener.current = false;
+        
       } else refError('handleMouseDown');
     } else console.error('Unable to locate droppableContext');
   }, [droppableContext, ref, draggableId, dragOrigin, dispatch]);
@@ -144,6 +150,7 @@ const Draggable = ({draggableId, draggableIndex, children}: Props) => {
               document.addEventListener('mouseup', handleMouseUp, {once: true});
               hasMouseUpListener.current = true;
             }
+            
           }
           break;
         }
@@ -188,8 +195,7 @@ const Draggable = ({draggableId, draggableIndex, children}: Props) => {
               }
               echo(`Setting pointerEvents to none for draggableId: ${draggableId}`, draggableId, 2);
               element.style.pointerEvents = 'none'
-              echo(`Setting cursor to grabbing for document.body`, draggableId, 2);
-              document.body.style.cursor = 'grabbing';
+              
             } else {
               echo(`Setting pointerEvents to none for draggableId: ${draggableId}`, draggableId, 2);
               element.style.pointerEvents = 'none'

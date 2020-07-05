@@ -19,7 +19,7 @@ import translateElement from './translateElement';
 // import { dragInit, dragActive } from '../../redux/dragDrop/actions'
 // import { select_status, select_currentDragAction, select_hoveredDroppableId, select_dragEndReason } from '../../redux/dragDrop/selectors';
 import extractElement from './extractElement';
-import { dragEnd, dragOver, dragFinish } from '../../redux/dragDrop/actions';
+import { dragEnd, dragOver, dragFinish, elementExtracted } from '../../redux/dragDrop/actions';
 import get_hoveredDroppableId from './get_hoveredDroppableId';
 
 export interface I_data_draggable {
@@ -112,6 +112,8 @@ export default function Context({children}: Props): ReactElement {
   const hasMouseMoveListener = useRef(false);
   const hasMouseUpListener = useRef(false);
 
+  const placeholderIndex = useRef(0);
+
 
   // console.log(draggableId);
   // console.log('data', JSON.parse(JSON.stringify(data)))
@@ -127,22 +129,31 @@ export default function Context({children}: Props): ReactElement {
       if(draggableData.current){
         if(!elementIsExtracted.current) {
           if(hoveredDroppableId.current){
-            console.log(data.droppables[hoveredDroppableId.current])
-            echo(`Extracting element`, 'context mousemove', 1);
-            extractElement(element.current, draggableData.current);
-            elementIsExtracted.current = true;
-            const placeholder = data.droppables[hoveredDroppableId.current].placeholderRef.current;
-            if(placeholder){
-              echo(`Sizing placeholder element`, 'context mousemove', 1);
-              placeholder.style.border = '10px solid red'
-              // console.log(draggableData)
-              // placeholder.style.height = Math.ceil(draggableData.current.height) + 'px';
-              // placeholder.style.width = Math.ceil(draggableData.current.width) + 'px';
-              placeholder.style.height = draggableData.current.height + 'px';
-              placeholder.style.width = draggableData.current.width + 'px';
-              placeholder.style.margin = draggableData.current.margin.computed;
-              
+            if(draggableId){
+              const placeholder = data.droppables[hoveredDroppableId.current].placeholderRef.current;
+              if(placeholder){
+                const draggable = data.droppables[hoveredDroppableId.current].draggables[draggableId];
+                if(draggable){
+                console.log(draggable.index)
+                const droppable = data.droppables[hoveredDroppableId.current].ref.current;
+                if(droppable) {
+                  // const insertIndex = placeholderIndex > draggableData.index ? draggableData.index : draggableData.index + 1;
+                  // const insertIndex = 
+                  droppable.insertBefore(placeholder, droppable.children[draggable.index]);
+                  console.log(draggableData);
+                  echo(`Extracting element`, 'context mousemove', 1);
+                  extractElement(element.current, draggableData.current);
+                  elementIsExtracted.current = true;
+                  echo(`Sizing placeholder element`, 'context mousemove', 1);
+                  placeholder.style.boxSizing = 'border-box';
+                  placeholder.style.height = draggableData.current.height + 'px';
+                  placeholder.style.width = draggableData.current.width + 'px';
+                  placeholder.style.margin = draggableData.current.margin.computed;
+                  dispatch(elementExtracted(true));
+                } else console.error('Unable to locate droppable');
+              } else console.error('Unable to locate draggable');
             } else console.error('Unable to locate placeholderRef.current');
+          } else console.error('Unable to find draggableId');
           } else console.error('hoveredDroppableId.current not found');
         }
         translateElement(e, element.current, draggableData.current);
@@ -156,6 +167,7 @@ export default function Context({children}: Props): ReactElement {
     } else console.error('Unable to find element.current');
   }, [
     hoveredDroppableId,
+    draggableId,
     // source,
     dispatch,
   ]);
@@ -230,13 +242,17 @@ export default function Context({children}: Props): ReactElement {
               if(sourceId){
                 if(draggableId){
                   const draggable = data.droppables[sourceId].draggables[draggableId].ref;
-                  console.log(draggable);
                   if(draggable.current){
-                    echo(`Resetting component`, 'Context', 2);
-                    draggable.current.setAttribute('style', '');
-                    placeholder.setAttribute('style', '');
-                    document.body.style.cursor = '';
-                    dispatch(dragFinish());
+                    const droppable = data.droppables[sourceId].ref.current;
+                    if(droppable){
+                      echo(`Resetting component`, 'Context', 2);
+                      draggable.current.setAttribute('style', '');
+                      placeholder.setAttribute('style', '');
+                      dispatch(elementExtracted(false));
+                      droppable.appendChild(placeholder);
+                      document.body.style.cursor = '';
+                      dispatch(dragFinish());
+                    } else console.error('Unable to locate droppable.current');
                   } else console.error('Unable to find draggable ref');
                 } else console.error('Unable to find draggableId');
               } else console.error('Unable to find sourceId');

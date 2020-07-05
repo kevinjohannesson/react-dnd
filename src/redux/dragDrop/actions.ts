@@ -23,6 +23,8 @@ import {
   T_dragEndReason,
   I_dragOver,
   DRAG_OVER,
+  I_elementExtracted,
+  ELEMENT_EXTRACTED,
 } from "./dragDrop.d"
 
 // type T_updateType = T_status| 'hover' | 'drop_position';
@@ -74,4 +76,12 @@ export const dragOver = (hoveredDroppableId: string | null): I_dragOver => (
 
 export const dragFinish = (): I_dragFinish => (
   {type: DRAG_FINISH}
+)
+
+// export const elementExtracted = (): I_elementExtracted => (
+//   {type: ELEMENT_EXTRACTED}
+// )
+
+export const elementExtracted = (condition: boolean): I_elementExtracted => (
+  {type: ELEMENT_EXTRACTED, condition}
 )

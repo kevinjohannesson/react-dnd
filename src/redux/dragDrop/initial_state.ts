@@ -10,4 +10,5 @@ export const initialState: I_DragDropState = {
   draggableId: null,
   sourceDroppableId: null,
   hoveredDroppableId: null,
+  elementExtracted: false,
 };

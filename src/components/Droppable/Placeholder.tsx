@@ -10,17 +10,13 @@ interface Props {
 }
 
 
-const Placeholder = React.forwardRef((props: Props, ref) => (
-  <PLACEHOLDER ref={ref as React.RefObject<HTMLDivElement>} {...props} />
-))
+const Placeholder = React.forwardRef((props: Props, ref) => {
+  return <PLACEHOLDER ref={ref as React.RefObject<HTMLDivElement>} {...props} />
+})
 
 export default Placeholder;
 
 const PLACEHOLDER = styled.div<Props>`
-  width: ${props => props.active ? props.width + 'px' : '0px'};
-  height: ${props => props.active ? props.height + 'px' : '0px'};
-  margin: ${props => props.margin};
-
   box-sizing: border-box;
   pointer-events: none;
   user-select: none;

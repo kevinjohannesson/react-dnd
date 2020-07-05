@@ -20,8 +20,10 @@ const shapes: SHAPE[] = ['circle','rectangle'];
 function App() {
   
   const placeholderCSS = {
-    border: '3px solid black',
-    backgroundColor: 'green'
+    border: '3px dashed white',
+    backgroundColor: 'rgba(255,255,255,0.5)',
+    borderRadius: '25px',
+    boxShadow: '0px 0px 34px -2px rgba(0,0,0,0.75)',
   }
   // const placeholder2CSS = {
   //   border: '3px solid white',

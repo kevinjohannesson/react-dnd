@@ -23,6 +23,7 @@ export interface I_DragDropState {
   draggableId: string | null;
   sourceDroppableId: string | null;
   hoveredDroppableId: string | null;
+  elementExtracted: boolean;
 }
 
 export interface I_draggableData {
@@ -48,6 +49,8 @@ export const SET_DROP_POSITION = 'SET_DROP_POSITION';
 export const DRAG_STOP = 'DRAG_STOP';
 export const DRAG_FINISH = 'DRAG_FINISH';
 export const DRAG_INACTIVE = 'DRAG_INACTIVE';
+
+export const ELEMENT_EXTRACTED = 'ELEMENT_EXTRACTED';
 
 const actions = [
   DRAG_INIT, 
@@ -98,4 +101,9 @@ export interface I_dragOver {
   hoveredDroppableId: string | null;
 }
 
-export type Actions = I_dragInit | I_dragActive | I_dragEnd | I_dragFinish | I_dragOver
+export interface I_elementExtracted {
+  type: typeof ELEMENT_EXTRACTED;
+  condition: boolean;
+}
+
+export type Actions = I_dragInit | I_dragActive | I_dragEnd | I_dragFinish | I_dragOver | I_elementExtracted
