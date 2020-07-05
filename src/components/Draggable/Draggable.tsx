@@ -1,203 +1,231 @@
-import React, { useEffect, useRef, } from 'react'
-import { useDispatch, useSelector } from 'react-redux';
-import { select_draggableData, select_status, select_dropPosition, select_dragEndReason } from '../../redux/dragDrop/selectors';
+import React, { useContext, useEffect, useRef, useCallback, } from 'react'
 // import { T_vector } from '../../redux/dragDrop/dragDrop';
 
+// import { ThemeContext } from 'styled-components';
+import { DragDropContext } from '../Context/Context';
+import echo, { diff } from '../../echo';
+import { DroppableContext } from '../Droppable/Droppable';
+import { useDispatch, useSelector } from 'react-redux';
+// import get_draggableData from '../Context/get_draggableData';
+import { dragInit, dragEnd, dragFinish, dragActive } from '../../redux/dragDrop/actions';
+import { select_status, userIsDraggingThis } from '../../redux/dragDrop/selectors';
+import { T_vector } from '../../redux/dragDrop/dragDrop.d';
 
-import extractElement from './extractElement';
 
-import blockEvents from './blockEvents';
-
-
-import { updateState } from '../../redux/dragDrop/actions';
-import get_draggableData from './get_draggableData';
-
-
-import get_hoverId from './get_hoverId';
 
 interface Props {
   children: any;
   draggableId: string;
   draggableIndex: number;
-  onDragEnd?: () => void;
 }
 
-const Draggable = ({draggableId, draggableIndex, onDragEnd, children}: Props) => {
-  // console.log(`%cDraggable ${draggableId}`, 'color: white; background-color: green; padding: 1rem;');
-  const dispatch = useDispatch();
-  const ref = React.createRef<HTMLElement | null>();
+const Draggable = ({draggableId, draggableIndex, children}: Props) => {
+  // console.log(`Draggable #${draggableId}...`);
+  echo(`Draggable component init #${draggableId}`, draggableId);
+  const ref = React.createRef<HTMLDivElement>();
+  const refError = (origin: string) => console.error('Unable to locate DOM element', origin);
+  const context = useContext(DragDropContext);
+  const droppableContext = useContext(DroppableContext);
 
-  const dragStatus = useSelector(select_status);
   const status = useSelector(select_status);
-  const draggableData = useSelector(select_draggableData);
-  const dropPosition = useSelector(select_dropPosition);
-  const dragEndReason = useSelector(select_dragEndReason);
+  const isBeingDragged = useSelector(userIsDraggingThis(draggableId));
 
-  const hoverId = useRef<string | null>(null);
-  const userIsDraggingThis = (draggableData && draggableData.id === draggableId) || false;
+  const dispatch = useDispatch();
+
+  const hasMouseDownListener = useRef(false);
+  const hasMouseMoveListener = useRef(false);
+  const hasMouseUpListener = useRef(false);
+  const dragOrigin = useRef<T_vector | null>(null)
   
-  
-  const status_inactive = useRef(false);
-  const status_init = useRef(false);
-  const status_active = useRef(false);
-  const status_stop = useRef(false);
-  const status_finish = useRef(false);
-  
-  const mouseDownListener = useRef(false);
-  const mouseMoveListener = useRef(false);
-  const mouseUpListener = useRef(false);
-  
-  const elementIsExtracted = useRef(false);
+  useEffect(()=>{
+    if(droppableContext){
+      echo('Adding draggable to the context', draggableId, 1);
+      context.add_draggable(draggableId, draggableIndex, droppableContext.id, ref);
+    } else {
+      console.error('Cannot find droppableContext.');
+    } 
+  },[droppableContext, context, draggableId, draggableIndex, ref])
+
+  // console.log(droppableContext);
+    
+
+  const handleMouseDown = useCallback((e: MouseEvent) => {
+    echo('handleMouseDown', draggableId+'mouseDown');
+    if(droppableContext){
+      if(ref.current){
+        // echo('Calculating draggable data for:', draggableId+'mouseDown', 1);
+        // console.dir(ref.current);
+        // const draggableData = get_draggableData(ref.current);
+        // console.log('draggableData', draggableData);
+        echo('Storing cursor position', draggableId+'mouseDown', 1);
+        dragOrigin.current = {x: e.clientX, y: e.clientY};
+        console.log(dragOrigin.current);
+        echo('Dispatching dragInit', draggableId+'mouseDown', 1);
+        dispatch(dragInit(droppableContext.id, draggableId));
+        hasMouseDownListener.current = false;
+      } else refError('handleMouseDown');
+    } else console.error('Unable to locate droppableContext');
+  }, [droppableContext, ref, draggableId, dragOrigin, dispatch]);
+
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    echo(`handleMouseMove, dragging ${draggableId}`, draggableId+'mousemove');
+    const threshold = 10;
+    if(dragOrigin.current){
+      if( 
+        diff(e.clientX, dragOrigin.current.x) > threshold ||
+        diff(e.clientY, dragOrigin.current.y) > threshold
+        ) {
+          echo(`Removing eventListener: mousemove from document for draggableId: ${draggableId}`, draggableId+'mousemove', 1);
+          document.removeEventListener('mousemove', handleMouseMove);
+          hasMouseMoveListener.current = false;
+          echo('Dispatching dragEnd', draggableId+'mousemove', 1);
+          dispatch(dragActive())
+        }
+    }
+  }, [draggableId, dragOrigin, dispatch]);
+
+  const handleMouseUp = useCallback(() => {
+    echo('handleMouseUp', draggableId+'mouseup');
+    if(hasMouseMoveListener.current){
+      echo(`Removing eventListener: mousemove from document for draggableId: ${draggableId}`, draggableId+'mouseup', 1);
+      document.removeEventListener('mousemove', handleMouseMove);
+      hasMouseMoveListener.current = false;
+    }
+    echo('Dispatching dragEnd', draggableId+'mouseup', 1);
+    dispatch(dragEnd());
+  }, [draggableId, handleMouseMove, dispatch]);
 
   useEffect(() => {
+    echo('Draggable useEffect #1', draggableId, 1);
     const element = ref.current;
-    
-    const handleMouseDown = (event: MouseEvent) => {
-      if(element){
-        mouseDownListener.current = false;
-        const draggableData = get_draggableData(event, element, draggableId, draggableIndex);
-        const droppableId = get_hoverId(event, draggableData);
-        dispatch(updateState('init', droppableId, draggableData));
-      }
-    }
-    const handleMouseMove = (event: MouseEvent) => {
-      if(element && draggableData){
-        const position = {x: event.clientX, y: event.clientY};
-        element.style.left = (position.x - draggableData.margin.left - (draggableData.width/2) ) + 'px';
-        element.style.top = (position.y - draggableData.margin.top - (draggableData.height/2)) + 'px';
-        const droppableId = get_hoverId(event, draggableData);
-        if(hoverId.current !== droppableId){
-          hoverId.current = droppableId;
-          dispatch(updateState('hover', droppableId)); 
-        }
-      }
-    }
-    const handleMouseUp = (event: MouseEvent) => {
-      if(element){
-        //Remove pointerEvents to prevent "catching" the draggable with a fast mouse click during state change.
-        element.style.pointerEvents = 'none';
-        //Remove this eventListener and update the local shadowState.
-        document.removeEventListener('mousemove', handleMouseMove);
-        mouseMoveListener.current = false;
-        mouseUpListener.current = false;
-        dispatch(updateState('stop', hoverId.current ? 'drop' : 'cancel'));
-      }
-    }
-    
-    if(element){
-      if(element.style.userSelect !== 'none') element.style.userSelect = 'none';
-      // console.log(status)
+    if(element) {
       switch(status){
         case 'inactive': {
-          if(!status_inactive.current){
-            if(!mouseDownListener.current){
-              element.addEventListener('mousedown', handleMouseDown, {once: true});
-              mouseDownListener.current = true;
-            }
-            if(mouseDownListener) {
-              if(element.style.pointerEvents !== '') element.style.pointerEvents = '';
-              status_finish.current = false;
-              status_inactive.current = true;
-            }
+          // if(droppableContext){
+          //   echo('Adding draggable to the context', draggableId, 1);
+          //   context.add_draggable(draggableId, draggableIndex, droppableContext.id, ref);
+          // } else {
+          //   console.error('Cannot find droppableContext.');
+          // } 
+
+          if(!hasMouseDownListener.current){
+            echo(`Adding eventListener: mousedown to draggableId: ${draggableId}`, draggableId, 2);
+            element.addEventListener('mousedown', handleMouseDown, {once: true});
+            hasMouseDownListener.current = true;
           }
+          if(element.style.userSelect !== 'none') {
+            echo('Setting userSelect to none', draggableId, 2);
+            element.style.userSelect = 'none';
+          }
+
           break;
         }
         case 'init': {
-          if(!status_init.current){
-            if(userIsDraggingThis && draggableData){
-              if(!elementIsExtracted.current){
-                extractElement(element, draggableData);
-                elementIsExtracted.current = true;
-              }
-              if(!mouseMoveListener.current){
-                document.addEventListener('mousemove', handleMouseMove);
-                mouseMoveListener.current = true;
-              }
-              if(!mouseUpListener.current){
-                document.addEventListener('mouseup', handleMouseUp, {once: true});
-                mouseUpListener.current = true;
-              }
-              if(elementIsExtracted && mouseMoveListener.current && mouseUpListener.current){
-                status_init.current = true; 
-                dispatch(updateState('active'));
-              }
+          if(isBeingDragged){
+            if(!hasMouseMoveListener.current){
+              echo(`Adding eventListener: mousemove to document for draggableId: ${draggableId}`, draggableId, 2);
+              document.addEventListener('mousemove', handleMouseMove);
+              hasMouseMoveListener.current = true;
             }
-            else if(!userIsDraggingThis){
-              blockEvents(element);
-              status_init.current = true; 
+            if(!hasMouseUpListener.current){
+              echo(`Adding eventListener: mouseup to document for draggableId: ${draggableId}`, draggableId, 2);
+              document.addEventListener('mouseup', handleMouseUp, {once: true});
+              hasMouseUpListener.current = true;
             }
           }
           break;
         }
-        case 'active': {
-          //
-          break;
-        }
-        case 'stop': {
-          if(!status_stop.current){
-            if(userIsDraggingThis && draggableData){
-              switch(dragEndReason){
-                case 'drop': {
-                  if(dropPosition){
-                    element.style.left = (dropPosition.x - draggableData.margin.left) + 'px';
-                    element.style.top = (dropPosition.y - draggableData.margin.top) + 'px';
-                    dispatch(updateState('finish'));
-                    break;
-                  }
-                }
-                // eslint-disable-next-line
-                case 'cancel': {
-                  element.style.left = (draggableData.x - draggableData.margin.left) + 'px';
-                  element.style.top = (draggableData.y - draggableData.margin.top) + 'px';
-                  dispatch(updateState('finish'));
-                  break;
-                }
-              }
-              if(onDragEnd) onDragEnd();
-              status_stop.current = true;
-            }
+        case 'end': {
+          echo(`Resetting component`, draggableId, 2);
+          element.setAttribute('style', '');
+          if(isBeingDragged){
+            echo('Dispatching dragFinish', draggableId, 2);
+            dispatch(dragFinish());
           }
-          break;
-        }
-        case 'finish': {
-          if(!status_finish.current){
-            // element.style.pointerEvents = 'none';
-            // element.setAttribute('style', '');
-            // elementIsExtracted.current = false;
 
-            
-            
-            status_inactive.current = false;
-            status_init.current = false;
-            status_active.current = false;
-            status_stop.current = false;
+        }
+      }
+    } else refError('useEffects #2');
 
-            if(userIsDraggingThis){
-              dispatch(updateState('inactive'));
+    return () => {
+      if(element){
+        switch(status){
+          case 'inactive': {
+            if(hasMouseDownListener.current){
+              echo(`Removing eventListener: mousedown from element for draggableId: ${draggableId}`, draggableId, 2);
+              element.removeEventListener('mousedown', handleMouseDown);
+              hasMouseDownListener.current = false;
             }
-            status_finish.current = true;
+            break;
           }
-          break;
+          case 'init': {
+            if(isBeingDragged){
+              if(hasMouseMoveListener.current){
+                echo(`Removing eventListener: mousemove from element for draggableId: ${draggableId}`, draggableId, 2);
+                document.removeEventListener('mousemove', handleMouseMove);
+                hasMouseMoveListener.current = false;
+              }
+              if(hasMouseUpListener.current){
+                echo(`Removing eventListener: mouseup from element for draggableId: ${draggableId}`, draggableId, 2);
+                document.removeEventListener('mousemove', handleMouseUp);
+                hasMouseUpListener.current = false;
+              }
+
+            } else {
+              echo(`Setting pointerEvents to none for draggableId: ${draggableId}`, draggableId, 2);
+              element.style.pointerEvents = 'none'
+            }
+            break;
+          }
         }
       }
     }
   }, [
-      ref, 
-      status,
-      dragStatus,
-      draggableData,
-      userIsDraggingThis,
-      dispatch,
-      draggableId,
-      draggableIndex,
-      dropPosition,
-      dragEndReason,
-      onDragEnd
-     ]);
+    context, draggableIndex, droppableContext,
+    ref, 
+    status, 
+    draggableId, 
+    handleMouseDown,
+    isBeingDragged,
+    handleMouseMove,
+    handleMouseUp,
+    dispatch,
+  ]);
+
+
+
+  
+
+
+  // const handleClick = useCallback(() => {
+  //   console.log(Math.random())
+  //   set_state(!state);  
+  // }, [state]);
+
+  // useEffect(()=>{
+  //   echo('Draggable useEffect #2', 'gold', 1);
+  //   // if(ref.current) {
+  //   //   echo('Adding listener:', 'gold', 2);
+  //   //   ref.current.addEventListener('click', handleClick)
+  //   // }
+  // }, [ref, handleClick])
+
+
+
+  
+  
+  
+  // useEffect(() => {
+  //   console.log('#2 draggable UE');
+  //   // context.add_draggable(draggableRef);
+  // }, [
+  //      draggableRef,
+  //      context,
+  //    ]);
 
   const exportedData = {
-    ref,
-    userIsDraggingThis
+    ref: ref,
+    userIsDraggingThis: isBeingDragged,
   }
 
   return (

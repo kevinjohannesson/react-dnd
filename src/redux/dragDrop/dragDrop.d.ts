@@ -8,7 +8,7 @@ export interface T_vector {
 export const dragStopReasons = ['drop', 'cancel'] as const;
 export type T_dragStopReason = typeof dragStopReasons[number];
 
-export const statuses = ['inactive', 'init', 'active', 'stop', 'finish'] as const;
+export const statuses = ['inactive', 'init', 'active', 'stop', 'end', 'finish'] as const;
 export type T_status = typeof statuses[number];
 
 type T_hoverId = string | null;
@@ -19,25 +19,25 @@ export interface I_DragDropState {
   hoverId: T_hoverId;
   dragStopReason: T_dragStopReason | null;
   dropPosition: T_vector | null;
+  draggableId: string | null;
+  source: string | null;
 }
 
 export interface I_draggableData {
-    id: string;
-    index: number;
-    height: number;
-    width: number;
-    x: number;
-    y: number;
-    margin: {
-      top: number,
-      right: number,
-      bottom: number,
-      left: number,
-      all: string
-    };
-    cursorPosition: vector;
+  height: number;
+  width: number;
+  x: number;
+  y: number;
+  margin: {
+    top: number,
+    right: number,
+    bottom: number,
+    left: number,
+    computed: string
+  };
 }
 
+export const DRAG_END = 'DRAG_END';
 export const DRAG_INIT = 'DRAG_INIT';
 export const DRAG_ACTIVE = 'DRAG_ACTIVE';
 export const SET_HOVER = 'SET_HOVER';
@@ -65,4 +65,27 @@ interface I_updateState extends Action {
   dropPosition?: T_vector;
 }
 
-export type Actions = I_updateState
+export interface I_dragInit {
+  type: typeof DRAG_INIT;
+  droppableId: string;
+  draggableId: string;
+}
+// export interface I_dragInit {
+//   type: typeof DRAG_INIT;
+//   droppableId: string;
+//   draggableId: string;
+//   draggableData: I_draggableData;
+// }
+export interface I_dragActive {
+  type: typeof DRAG_ACTIVE;
+}
+
+export interface I_dragEnd {
+  type: typeof DRAG_END;
+}
+
+export interface I_dragFinish {
+  type: typeof DRAG_FINISH;
+}
+
+export type Actions = I_dragInit | I_dragActive | I_dragEnd | I_dragFinish

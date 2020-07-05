@@ -3,9 +3,18 @@ import styled from 'styled-components';
 
 import Droppable, { interface_droppableData } from './components/Droppable/Droppable';
 import Block, {SHAPE} from './components/test_components/Block';
+import Context from './components/Context/Context';
+
+/* Console.log Color Theme Swatches in Hex */
+// #D90B31
+// #698C35
+// #D2D9A3
+// #F2B90F
+// #F2780C
+
 
 // const shapes: SHAPE[] = ['square','rectangle','circle'];
-const shapes: SHAPE[] = ['square','rectangle'];
+const shapes: SHAPE[] = ['circle','rectangle'];
 // const shapes: SHAPE[] = ['square'];
 
 function App() {
@@ -14,21 +23,21 @@ function App() {
     border: '3px solid black',
     backgroundColor: 'green'
   }
-  const placeholder2CSS = {
-    border: '3px solid white',
-    backgroundColor: 'rgba(255,255,255,0.3)',
-    borderRadius: '10px',
-    boxShadow: '0px 0px 40px 6px rgba(0,0,0,0.21)'
-  }
+  // const placeholder2CSS = {
+  //   border: '3px solid white',
+  //   backgroundColor: 'rgba(255,255,255,0.3)',
+  //   borderRadius: '10px',
+  //   boxShadow: '0px 0px 40px 6px rgba(0,0,0,0.21)'
+  // }
   return (
-    <React.Fragment>
+    <Context>
       <CONTAINER>
         
-        <Droppable droppableId="anotherID" placeholderCSS={placeholderCSS}>
+        <Droppable droppableId="uniqueID" placeholderCSS={placeholderCSS}>
           {(data: interface_droppableData) => (
             <DROPAREA
               userIsDragging={data.userIsDragging}
-              userIsDraggingOverThis={data.userIsDraggingOverThis}
+              isHovered={data.isHovered}
               ref={data.ref}
             >
               { shapes.map((shape, index) => 
@@ -38,11 +47,11 @@ function App() {
           )}
         </Droppable>
         
-        <Droppable droppableId="uniqueID" placeholderCSS={placeholder2CSS}>
+        {/* <Droppable droppableId="anotherID" placeholderCSS={placeholder2CSS}>
           {(droppableData: interface_droppableData) => (
             <DROPAREA 
               userIsDragging={droppableData.userIsDragging}
-              userIsDraggingOverThis={droppableData.userIsDraggingOverThis}
+              userIsDraggingOverThis={droppableData.isHovered}
               position={{position: 'absolute', bottom: '10px', left: '10px', right: '10px', height: '200px'}}
               ref={droppableData.ref} 
             >
@@ -55,17 +64,17 @@ function App() {
           {(droppableData: interface_droppableData) => (
             <DROPAREA 
               userIsDragging={droppableData.userIsDragging}
-              userIsDraggingOverThis={droppableData.userIsDraggingOverThis}
+              userIsDraggingOverThis={droppableData.isHovered}
               position={{position: 'absolute', top: '10px', left: '10px'}}
               ref={droppableData.ref} 
             >
               {droppableData.placeholder}
             </DROPAREA>
           )}
-        </Droppable>
+        </Droppable> */}
     
       </CONTAINER>
-    </React.Fragment>
+    </Context>
   );
 }
 
@@ -84,12 +93,12 @@ const CONTAINER = styled.div`
 
 const DROPAREA = styled.div<{
   userIsDragging: boolean, 
-  userIsDraggingOverThis: boolean,
+  isHovered: boolean,
   position?: any;
 }>`
   min-width: 100px;
   min-height: 100px;
-  border: ${props => props.userIsDraggingOverThis ? '5px dashed white' : '3px dashed white'};
+  border: ${props => props.isHovered ? '5px dashed white' : '3px dashed white'};
   border-radius: 25px;
   
   

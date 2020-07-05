@@ -6,4 +6,6 @@ export const initialState: I_DragDropState = {
   hoverId: null,
   dropPosition: null,
   dragStopReason: null,
+  draggableId: null,
+  source: null,
 };

@@ -1,0 +1,222 @@
+import React, { ReactElement, useEffect, useCallback, useRef,
+  //  useEffect,
+    // useCallback,
+    //  useMemo 
+    } from 'react'
+import { useSelector } from 'react-redux';
+import { select_status, select_draggableId, select_source } from '../../redux/dragDrop/selectors';
+import echo from '../../echo';
+import { I_draggableData } from '../../redux/dragDrop/dragDrop';
+import get_draggableData from './get_draggableData';
+import translateElement from './translateElement';
+// import echo from '../../echo';
+// import get_draggableData from './get_draggableData';
+// import { 
+  // useDispatch, 
+  // useSelector } from 'react-redux';
+// import { dragInit, dragActive } from '../../redux/dragDrop/actions'
+// import { select_status, select_currentDragAction } from '../../redux/dragDrop/selectors';
+import extractElement from './extractElement';
+
+export interface I_data_draggable {
+  id: string;
+  index: number;
+  ref: React.RefObject<HTMLDivElement>;
+}
+
+export type T_draggables = {
+    [key: string]: I_data_draggable;
+  }
+
+export interface I_data_droppable {
+  id: string;
+  ref: React.RefObject<HTMLDivElement>;
+  draggables: T_draggables;
+  // id: string,
+  // type: string,
+  // drop_disabled: boolean,
+  // placeholder: {
+  //   ref: React.RefObject<HTMLDivElement>,
+  // }
+}
+
+export interface I_data {
+  droppables: {
+    [key: string]: I_data_droppable;
+  }
+  add_droppable: (id: string, ref: React.RefObject<HTMLDivElement>) => I_data_droppable;
+  add_draggable: (id: string, index: number, droppableId: string, ref: React.RefObject<HTMLDivElement>) => void;
+}
+
+const data: I_data = {
+  droppables: {},
+  add_droppable: function(id, ref){
+    this.droppables[id] = {
+      ...this.droppables[id],
+      id,
+      ref,
+    }
+
+    return this.droppables[id];
+  },
+  add_draggable: function(id, index, droppableId, ref){
+    const droppable = this.droppables[droppableId];
+    const new_droppable = {
+      ...droppable,
+      draggables: {
+        ...droppable.draggables,
+        [id]: {
+          id,
+          index,
+          ref
+        }
+      }
+    }
+    this.droppables[droppableId] = new_droppable;
+  }
+};
+
+export const DragDropContext = React.createContext(data);
+
+interface Props {
+  children: any;
+}
+
+export default function Context({children}: Props): ReactElement {
+  echo('Context component init...', 'Context');
+  // const dispatch = useDispatch();
+  
+  const status = useSelector(select_status);
+  // console.log(status);
+  const draggableId = useSelector(select_draggableId);
+  const source = useSelector(select_source);
+
+  const draggableData = useRef<I_draggableData | null>(null);
+  const element = useRef<HTMLElement | null>(null);
+  const elementIsExtracted = useRef(false);
+  // console.log(draggableId);
+  // console.log('data', JSON.parse(JSON.stringify(data)))
+  
+
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    echo(`handleMouseMove`, 'context mousemove');
+    // console.log(element.current)
+    // console.log('draggableData.current', draggableData.current)
+    if(element.current){
+      if(draggableData.current){
+        if(!elementIsExtracted.current) {
+          echo(`Extracting element`, 'context mousemove', 1);
+          extractElement(element.current, draggableData.current);
+          elementIsExtracted.current = true;
+        }
+
+        translateElement(e, element.current, draggableData.current);
+      } else console.error('Unable to find draggableData.current');
+    } else console.error('Unable to find element.current');
+  }, []);
+
+
+  useEffect(()=>{
+    switch(status){
+      case 'active': {
+        echo('Context taking over...', 'Context', 1);
+        if(draggableId){
+          if(source){
+            const draggable = data.droppables[source].draggables[draggableId].ref;
+            if(draggable.current){
+              element.current = draggable.current;
+              draggableData.current = get_draggableData(element.current);
+              document.addEventListener('mousemove', handleMouseMove);
+            } else console.error('Unable to find draggable.current');
+          } else console.error('Unable to find source');
+        } else console.error('Unable to find draggableId');
+        break;
+      }
+      case 'end': {
+        echo('Removing eventListener "mousemove" from document', 'Context', 1);
+        document.removeEventListener('mousemove', handleMouseMove);
+        elementIsExtracted.current = false;
+      }
+    }
+  }, [
+    status, 
+    draggableId,
+    source,
+    handleMouseMove,
+  ])
+  // const dragAction = useSelector(select_currentDragAction);
+  // console.log(dragAction)
+
+  // const handleMouseDown = useCallback((droppableId, draggableId) => {
+  //   echo('handleMouseDown', '#698C35');
+  //   echo('Calculating draggable data', '#698C35', 1);
+  //   console.log(data.droppables[draggableId]);
+  //   console.log(draggableId, droppableId)
+  //   const draggable = data.droppables[draggableId].draggables[droppableId];
+  //   if(draggable.ref.current){
+  //     const draggableData = get_draggableData(draggable.ref.current);
+  //     echo('Dispatching dragInit', '#698C35', 1);
+  //     dispatch(dragInit(draggableId, draggableData, droppableId ));
+  //   } else console.error('Unable to find draggable with id: ', draggableId);
+  // }, [dispatch]);
+
+  // const handleMouseMove = useCallback((e: MouseEvent, dragAction: {draggableId: string, source: string})=> {
+  //   echo('handleMouseMove', '#F2780C');
+  //   console.log(dragAction)
+  //   // const draggable 
+  //   // const draggable = data.droppables[dragAction.source].draggables[dragAction.draggableId];
+  //   // console.log(draggable.ref);
+  //   // if(draggable.ref.current){
+  //     // const draggableData = get_draggableData(draggable.ref.current);
+  //     // draggable.ref.current.style.left = (e.clientX - draggableData.margin.left - (draggableData.width/2) ) + 'px';
+  //     // draggable.ref.current.style.top = (e.clientY - draggableData.margin.top - (draggableData.height/2)) + 'px';
+  //     // draggable.ref.current.style.position = 'fixed';
+  //   // }
+  // }, []);
+
+  // const handleMouseUp = useCallback((e: MouseEvent) => {
+
+  // }, []);
+
+  // useEffect(()=>{
+  //   echo('Context useEffect #1', '#D2D9A3', 1);
+  //   for(const droppableId in data.droppables){
+  //     for(const draggableId in data.droppables[droppableId].draggables){
+  //       const draggable = data.droppables[droppableId].draggables[draggableId];
+  //       const element = draggable.ref.current;
+  //       if(element) {
+  //         const draggableData = get_draggableData(element);
+  //         const new_draggable: I_data_draggable = {
+  //           ...draggable,
+  //           ...draggableData
+  //         };
+  //         echo(`Storing Draggable component DOM information`, '#D2D9A3', 2);
+  //         data.droppables[droppableId].draggables[draggableId] = new_draggable;
+  //         echo(`Adding eventListener: mousedown to draggableId: ${draggableId}`, '#D2D9A3', 2);
+  //         element.addEventListener('mousedown', () => handleMouseDown(draggableId, droppableId), {once: true});
+  //       } else console.error('DOM Element not found.')
+  //     }
+  //   }
+
+  // }, [handleMouseDown]);
+
+  // useEffect(() => {
+  //   echo('Context useEffect #2', '#D2D9A3', 1);
+  //   if(status === 'init'){
+  //     console.log(data)
+  //     console.log(dragAction)
+  //     if(dragAction) {
+  //       echo(`Adding mousemove listener for ${dragAction.draggableId}`, '#D2D9A3', 2);
+  //       document.addEventListener('mousemove', (e)=>handleMouseMove(e, dragAction));
+  //       dispatch(dragActive());
+  //     } else console.error('dragAction not found');
+  //   }
+  // }, [status, dragAction, handleMouseMove, dispatch]);
+
+
+  return (
+    <DragDropContext.Provider value={data}>
+      {children}
+    </DragDropContext.Provider>
+  )
+}
