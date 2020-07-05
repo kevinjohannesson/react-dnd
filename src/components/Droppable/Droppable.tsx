@@ -40,6 +40,7 @@ export default function Droppable({droppableId, placeholderCSS, children}: Props
   
   const placeholderRef = React.createRef<HTMLDivElement>();
   
+  echo('Adding droppable to context', droppableId, 1);
   const droppable = context.add_droppable(droppableId, ref, placeholderRef);
   
   

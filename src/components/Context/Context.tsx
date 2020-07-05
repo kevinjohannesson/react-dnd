@@ -4,7 +4,7 @@ import React, { ReactElement, useEffect, useCallback, useRef,
     //  useMemo 
     } from 'react'
 import { useSelector, useDispatch } from 'react-redux';
-import { select_status, select_draggableId, select_source, select_hoveredDroppableId, 
+import { select_status, select_draggableId, select_sourceDroppableId, select_hoveredDroppableId, select_dragEndReason, 
   // select_hoveredDroppableId
  } from '../../redux/dragDrop/selectors';
 import echo from '../../echo';
@@ -17,9 +17,9 @@ import translateElement from './translateElement';
   // useDispatch, 
   // useSelector } from 'react-redux';
 // import { dragInit, dragActive } from '../../redux/dragDrop/actions'
-// import { select_status, select_currentDragAction, select_hoveredDroppableId } from '../../redux/dragDrop/selectors';
+// import { select_status, select_currentDragAction, select_hoveredDroppableId, select_dragEndReason } from '../../redux/dragDrop/selectors';
 import extractElement from './extractElement';
-import { dragEnd, dragOver } from '../../redux/dragDrop/actions';
+import { dragEnd, dragOver, dragFinish } from '../../redux/dragDrop/actions';
 import get_hoveredDroppableId from './get_hoveredDroppableId';
 
 export interface I_data_draggable {
@@ -50,8 +50,7 @@ export interface I_data {
     [key: string]: I_data_droppable;
   }
   add_droppable: (id: string, ref: React.RefObject<HTMLDivElement>, placeholderRef: React.RefObject<HTMLDivElement>) => I_data_droppable;
-  add_draggable: (id: string, index: number, droppableId: string, ref: React.RefObject<HTMLDivElement>) => void;
-  test: (id: string, droppableId: string) => React.RefObject<HTMLDivElement>;
+  add_draggable: (id: string, index: number, droppableId: string, ref: React.RefObject<HTMLDivElement>) => I_data_draggable;
 }
 
 const data: I_data = {
@@ -80,13 +79,8 @@ const data: I_data = {
       }
     }
     this.droppables[droppableId] = new_droppable;
-  },
-  test: function(id, droppableId){
-    console.log(id);
-    console.log(droppableId);
-    return React.createRef<HTMLDivElement>()
+    return this.droppables[droppableId].draggables[id];
   }
-  
 };
 
 export const DragDropContext = React.createContext(data);
@@ -102,8 +96,11 @@ export default function Context({children}: Props): ReactElement {
   const status = useSelector(select_status);
   // console.log(status);
   const draggableId = useSelector(select_draggableId);
-  const source = useSelector(select_source);
+  const sourceId = useSelector(select_sourceDroppableId);
   const hoveredId = useSelector(select_hoveredDroppableId);
+
+
+  const dragEndReason = useSelector(select_dragEndReason);
   // console.log(hoveredDroppableId)
   const hoveredDroppableId = useRef<string | null>(null);
   hoveredDroppableId.current = hoveredId;
@@ -134,6 +131,18 @@ export default function Context({children}: Props): ReactElement {
             echo(`Extracting element`, 'context mousemove', 1);
             extractElement(element.current, draggableData.current);
             elementIsExtracted.current = true;
+            const placeholder = data.droppables[hoveredDroppableId.current].placeholderRef.current;
+            if(placeholder){
+              echo(`Sizing placeholder element`, 'context mousemove', 1);
+              placeholder.style.border = '10px solid red'
+              // console.log(draggableData)
+              // placeholder.style.height = Math.ceil(draggableData.current.height) + 'px';
+              // placeholder.style.width = Math.ceil(draggableData.current.width) + 'px';
+              placeholder.style.height = draggableData.current.height + 'px';
+              placeholder.style.width = draggableData.current.width + 'px';
+              placeholder.style.margin = draggableData.current.margin.computed;
+              
+            } else console.error('Unable to locate placeholderRef.current');
           } else console.error('hoveredDroppableId.current not found');
         }
         translateElement(e, element.current, draggableData.current);
@@ -156,12 +165,29 @@ export default function Context({children}: Props): ReactElement {
     echo(`Removing eventListener: mousemove from document for draggableId: ${draggableId}`, draggableId+'mouseup', 1);
     document.removeEventListener('mousemove', handleMouseMove);
     hasMouseMoveListener.current = false;
-    echo('Dispatching dragEnd', draggableId+'mouseup', 1);
-    dispatch(dragEnd('cancel'));
+    
+
+    // console.log(source);
+    // console.log(hoveredDroppableId.current);
+    if(
+        hoveredDroppableId.current === null ||
+        hoveredDroppableId.current ===  sourceId
+      ){
+        echo('Dispatching dragEnd: cancel', draggableId+'mouseup', 1);
+        dispatch(dragEnd('cancel'));
+    }
+    else if(hoveredDroppableId.current !== sourceId){
+      echo('Dispatching dragEnd: drop', draggableId+'mouseup', 1);
+      dispatch(dragEnd('drop'));
+    }
+
+
     hasMouseUpListener.current = false;
+
   }, [
     draggableId, 
     handleMouseMove, 
+    sourceId,
     dispatch,
   ]);
 
@@ -171,8 +197,8 @@ export default function Context({children}: Props): ReactElement {
       case 'active': {
         echo('Context taking over...', 'Context', 1);
         if(draggableId){
-          if(source){
-            const draggable = data.droppables[source].draggables[draggableId].ref;
+          if(sourceId){
+            const draggable = data.droppables[sourceId].draggables[draggableId].ref;
             if(draggable.current){
               element.current = draggable.current;
               draggableData.current = get_draggableData(element.current);
@@ -195,14 +221,42 @@ export default function Context({children}: Props): ReactElement {
         echo('Removing eventListener "mousemove" from document', 'Context', 1);
         document.removeEventListener('mousemove', handleMouseMove);
         elementIsExtracted.current = false;
+        console.log('dragEndReason', dragEndReason)
+        switch(dragEndReason){
+          case 'cancel': {
+            echo(`Dragging cancelled`, 'Context', 2);
+            const placeholder = sourceId ? data.droppables[sourceId].placeholderRef.current : null;
+            if(placeholder){
+              if(sourceId){
+                if(draggableId){
+                  const draggable = data.droppables[sourceId].draggables[draggableId].ref;
+                  console.log(draggable);
+                  if(draggable.current){
+                    echo(`Resetting component`, 'Context', 2);
+                    draggable.current.setAttribute('style', '');
+                    placeholder.setAttribute('style', '');
+                    document.body.style.cursor = '';
+                    dispatch(dragFinish());
+                  } else console.error('Unable to find draggable ref');
+                } else console.error('Unable to find draggableId');
+              } else console.error('Unable to find sourceId');
+            } else console.error('Unable to locate placeholder')
+            break;
+          }
+          case 'drop': {
+            break;
+          }
+        }
       }
     }
   }, [
     status, 
     draggableId,
-    source,
+    sourceId,
     handleMouseMove,
     handleMouseUp,
+    dragEndReason,
+    dispatch,
   ])
   // const dragAction = useSelector(select_currentDragAction);
   // console.log(dragAction)
@@ -280,3 +334,42 @@ export default function Context({children}: Props): ReactElement {
     </DragDropContext.Provider>
   )
 }
+
+
+// const checkboxes = {
+//   jsFrameworks: {day: 'str', price: 15, checked: false},
+//   jsLibs: {day: 'str', price: 15, checked: false},
+//   express: {day: 'str', price: 15, checked: false},
+//   node: {day: 'str', price: 15, checked: false},
+//   buildTools: {day: 'str', price: 15, checked: false},
+//   npm: {day: 'str', price: 15, checked: false},
+// }
+
+// const camelCaseName = (string: string) => (
+//   string.split('-').map((piece, i)=> {
+//     if(i === 0) return piece 
+//     else return piece.charAt(0).toUpperCase() + piece.slice(1)
+//   }
+//   ).join('')
+// )
+
+// jeCheckboxElement.addEventListener('change', (e)=>checkboxes[camelCaseName(jeCheckboxNameDataAttribute)].checked = e.target.checked)
+
+
+// const allCheckboxes = Array.from(document.querySelectorAll('input[type=checkbox]'));
+// const checkboxes: {[key: string]: any} = {}
+// allCheckboxes.forEach( checkbox => {
+//   const name = checkbox.getAttribute('data-name');
+//   if(name){
+//     const cC_name = camelCaseName(name);
+//     checkboxes[cC_name] = {
+//       day: checkbox.getAttribute('day-and-time'),
+//       price: checkbox.getAttribute('price'),
+//       checked: checkbox.checked,
+//     }
+//     checkbox.addEventListener('change', (e)=>checkboxes[cC_name].checked = e.target.checked)
+//   }
+// } )
+
+
+// console.log(allCheckboxes)

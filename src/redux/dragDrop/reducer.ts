@@ -23,7 +23,7 @@ export default function reducer(
       return {
         ...state,
         status: 'init',
-        source: action.droppableId,
+        sourceDroppableId: action.droppableId,
         draggableId: action.draggableId,
         hoveredDroppableId: action.droppableId
       }
@@ -70,9 +70,9 @@ export default function reducer(
     case DRAG_FINISH: {
       return {
         ...state,
-        source: null,
+        sourceDroppableId: null,
         draggableId: null,
-        draggableData: null,
+        // draggableData: null,
         dragEndReason: null,
         status: 'inactive'
       }

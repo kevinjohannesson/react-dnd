@@ -37,21 +37,21 @@ const Draggable = ({draggableId, draggableIndex, children}: Props) => {
   const hasMouseUpListener = useRef(false);
   const dragOrigin = useRef<T_vector | null>(null)
 
-  const testRef = useRef<HTMLDivElement | null>(null);
-  if(droppableContext){
-    testRef.current = context.test(draggableId, droppableContext.id).current
-  } else console.error('Unable to locate droppableContext');
-  useEffect(()=>{
-    if(droppableContext){
-      echo('Adding draggable to the context', draggableId, 1);
-      context.add_draggable(draggableId, draggableIndex, droppableContext.id, ref);
+  
+  const draggable = droppableContext ? context.add_draggable(draggableId, draggableIndex, droppableContext.id, ref) : null;
+  
 
-      // testRef.current = context.test(draggableId, droppableContext.id).current
-      console.log(testRef.current);
-    } else {
-      console.error('Cannot find droppableContext.');
-    } 
-  },[droppableContext, context, draggableId, draggableIndex, ref])
+  // if(droppableContext){
+  //   testRef.current = context.test(draggableId, droppableContext.id).current
+  // } else console.error('Unable to locate droppableContext');
+  // useEffect(()=>{
+  //   if(droppableContext){
+  //     echo('Adding draggable to the context', draggableId, 1);
+  //     context.add_draggable(draggableId, draggableIndex, droppableContext.id, ref);
+  //   } else {
+  //     console.error('Cannot find droppableContext.');
+  //   } 
+  // },[droppableContext, context, draggableId, draggableIndex, ref])
 
   // console.log(droppableContext);
     
@@ -150,13 +150,13 @@ const Draggable = ({draggableId, draggableIndex, children}: Props) => {
 
         
         case 'end': {
-          echo(`Resetting component`, draggableId, 2);
-          element.setAttribute('style', '');
-          echo(`Setting cursor to '' for document.body`, draggableId, 2);
-          document.body.style.cursor = '';
-          if(isBeingDragged){
-            echo('Dispatching dragFinish', draggableId, 2);
-            dispatch(dragFinish());
+          //   echo(`Setting cursor to '' for document.body`, draggableId, 2);
+          //   document.body.style.cursor = '';
+          if(!isBeingDragged){
+            echo(`Resetting component`, draggableId, 2);
+            element.setAttribute('style', '');
+        //     echo('Dispatching dragFinish', draggableId, 2);
+        //     dispatch(dragFinish());
           }
 
         }
@@ -243,7 +243,7 @@ const Draggable = ({draggableId, draggableIndex, children}: Props) => {
   //    ]);
 
   const exportedData = {
-    ref: testRef,
+    ref,
     userIsDraggingThis: isBeingDragged,
   }
 

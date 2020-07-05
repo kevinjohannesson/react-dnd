@@ -15,13 +15,13 @@ type T_hoverId = string | null;
 
 export interface I_DragDropState {
   status: T_status;
-  draggableData: I_draggableData | null;
-  hoverId: T_hoverId;
-  dragStopReason: T_dragStopReason | null;
+  // draggableData: I_draggableData | null;
+  // hoverId: T_hoverId;
+  // dragStopReason: T_dragStopReason | null;
   dragEndReason: T_dragEndReason | null;
-  dropPosition: T_vector | null;
+  // dropPosition: T_vector | null;
   draggableId: string | null;
-  source: string | null;
+  sourceDroppableId: string | null;
   hoveredDroppableId: string | null;
 }
 
