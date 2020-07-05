@@ -7,7 +7,8 @@ import { I_DragDropState,
       //  SET_HOVER,
         Actions,
         DRAG_END,
-         DRAG_FINISH 
+         DRAG_FINISH, 
+         DRAG_OVER
         } from "./dragDrop.d";
 import { initialState } from "./initial_state";
 
@@ -23,7 +24,8 @@ export default function reducer(
         ...state,
         status: 'init',
         source: action.droppableId,
-        draggableId: action.draggableId
+        draggableId: action.draggableId,
+        hoveredDroppableId: action.droppableId
       }
     }
     // case DRAG_INIT: {
@@ -42,11 +44,26 @@ export default function reducer(
         status: 'active'
       }
     }
+    case DRAG_OVER: {
+      if(action.hoveredDroppableId === state.hoveredDroppableId){
+        console.log('just returning state');
+        console.log(action.hoveredDroppableId)
+        console.log(state.hoveredDroppableId)
+        return state;
+    }   
+      else {
+        return {
+          ...state,
+          hoveredDroppableId: action.hoveredDroppableId
+        }
+      }
+    }
 
     case DRAG_END: {
       return {
         ...state,
-        status: 'end'
+        status: 'end',
+        dragEndReason: action.dragEndReason,
       }
     }
 
@@ -56,6 +73,7 @@ export default function reducer(
         source: null,
         draggableId: null,
         draggableData: null,
+        dragEndReason: null,
         status: 'inactive'
       }
     }

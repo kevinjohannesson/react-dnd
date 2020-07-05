@@ -7,6 +7,11 @@ export const isUserDraggingOver = (droppableId: string) => (state: State) => (
 export const select_source = (state: State) => state.DragDrop.source;
 export const select_draggableId = (state: State) => state.DragDrop.draggableId;
 export const select_draggableData = (state: State) => state.DragDrop.draggableData;
+export const select_hoveredDroppableId = (state: State) => state.DragDrop.hoveredDroppableId;
+
+export const is_hoveredDroppableId = (droppableId: string) => (state: State) => (
+  state.DragDrop.hoveredDroppableId === droppableId );
+  
 export const userIsDraggingThis = (draggableId: string) => (state: State) => (
   state.DragDrop.draggableId === draggableId
 );

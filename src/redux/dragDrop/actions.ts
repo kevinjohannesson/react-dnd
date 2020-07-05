@@ -20,6 +20,9 @@ import {
   I_dragEnd,
   I_dragFinish,
   DRAG_FINISH,
+  T_dragEndReason,
+  I_dragOver,
+  DRAG_OVER,
 } from "./dragDrop.d"
 
 // type T_updateType = T_status| 'hover' | 'drop_position';
@@ -51,8 +54,8 @@ import {
 
 
 
-export const dragEnd = (): I_dragEnd => (
-  {type: DRAG_END}
+export const dragEnd = (dragEndReason: T_dragEndReason): I_dragEnd => (
+  {type: DRAG_END, dragEndReason}
 )
 export const dragInit = (droppableId: string, draggableId: string): I_dragInit => (
   {type: DRAG_INIT, droppableId, draggableId}
@@ -63,6 +66,10 @@ export const dragInit = (droppableId: string, draggableId: string): I_dragInit =
 
 export const dragActive = (): I_dragActive => (
   {type: DRAG_ACTIVE}
+)
+
+export const dragOver = (hoveredDroppableId: string | null): I_dragOver => (
+  {type: DRAG_OVER, hoveredDroppableId}
 )
 
 export const dragFinish = (): I_dragFinish => (

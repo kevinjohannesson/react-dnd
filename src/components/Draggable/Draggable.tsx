@@ -78,7 +78,7 @@ const Draggable = ({draggableId, draggableIndex, children}: Props) => {
           echo(`Removing eventListener: mousemove from document for draggableId: ${draggableId}`, draggableId+'mousemove', 1);
           document.removeEventListener('mousemove', handleMouseMove);
           hasMouseMoveListener.current = false;
-          echo('Dispatching dragEnd', draggableId+'mousemove', 1);
+          echo('Dispatching dragActive', draggableId+'mousemove', 1);
           dispatch(dragActive())
         }
     }
@@ -92,7 +92,7 @@ const Draggable = ({draggableId, draggableIndex, children}: Props) => {
       hasMouseMoveListener.current = false;
     }
     echo('Dispatching dragEnd', draggableId+'mouseup', 1);
-    dispatch(dragEnd());
+    dispatch(dragEnd('cancel'));
   }, [draggableId, handleMouseMove, dispatch]);
 
   useEffect(() => {
@@ -118,6 +118,11 @@ const Draggable = ({draggableId, draggableIndex, children}: Props) => {
             element.style.userSelect = 'none';
           }
 
+          if(element.style.cursor !== 'grab'){
+            echo(`Setting cursor to 'grab' for element`, draggableId, 2);
+            element.style.cursor = 'grab';
+          }
+
           break;
         }
         case 'init': {
@@ -135,9 +140,13 @@ const Draggable = ({draggableId, draggableIndex, children}: Props) => {
           }
           break;
         }
+
+        
         case 'end': {
           echo(`Resetting component`, draggableId, 2);
           element.setAttribute('style', '');
+          echo(`Setting cursor to '' for document.body`, draggableId, 2);
+          document.body.style.cursor = '';
           if(isBeingDragged){
             echo('Dispatching dragFinish', draggableId, 2);
             dispatch(dragFinish());
@@ -155,7 +164,7 @@ const Draggable = ({draggableId, draggableIndex, children}: Props) => {
               echo(`Removing eventListener: mousedown from element for draggableId: ${draggableId}`, draggableId, 2);
               element.removeEventListener('mousedown', handleMouseDown);
               hasMouseDownListener.current = false;
-            }
+            } 
             break;
           }
           case 'init': {
@@ -167,10 +176,13 @@ const Draggable = ({draggableId, draggableIndex, children}: Props) => {
               }
               if(hasMouseUpListener.current){
                 echo(`Removing eventListener: mouseup from element for draggableId: ${draggableId}`, draggableId, 2);
-                document.removeEventListener('mousemove', handleMouseUp);
+                document.removeEventListener('mouseup', handleMouseUp);
                 hasMouseUpListener.current = false;
               }
-
+              echo(`Setting pointerEvents to none for draggableId: ${draggableId}`, draggableId, 2);
+              element.style.pointerEvents = 'none'
+              echo(`Setting cursor to grabbing for document.body`, draggableId, 2);
+              document.body.style.cursor = 'grabbing';
             } else {
               echo(`Setting pointerEvents to none for draggableId: ${draggableId}`, draggableId, 2);
               element.style.pointerEvents = 'none'

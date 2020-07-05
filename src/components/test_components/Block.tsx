@@ -46,7 +46,7 @@ const BLOCK = styled.div<{userIsDraggingThis: boolean, shape?: SHAPE}>`
   border-radius: ${props => props.shape === 'circle' ? '75px' : '25px'};
   background-color: white;
 
-  border: 3px solid rgba(0,0,0,0);
+  /* border: 3px solid rgba(0,0,0,0); */
 
   margin: 10px;
   /* margin: 10px 12px 8px 6px; */
@@ -58,17 +58,13 @@ const BLOCK = styled.div<{userIsDraggingThis: boolean, shape?: SHAPE}>`
   justify-content: center;
   
   color: #a8c0ff;
-  /* cursor: ${props => props.userIsDraggingThis ? 'grabbing' : 'grab'}; */
-  
-  border: ${props => props.userIsDraggingThis ? '5px dashed skyblue' : '3px solid rgba(0,0,0,0)'};
   
   &:hover {
-    border: ${props => props.userIsDraggingThis ? '5px dashed skyblue' : '3px solid skyblue'};
-    cursor: grab;
+    border: 3px solid orangered;
   }
-
+  
   &:active {
-    cursor: grabbing;
+    border: 5px dashed orangered;
     animation: ${shake} 0.5s ease-in-out 0s infinite;
   }
 `

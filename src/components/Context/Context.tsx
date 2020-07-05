@@ -3,8 +3,10 @@ import React, { ReactElement, useEffect, useCallback, useRef,
     // useCallback,
     //  useMemo 
     } from 'react'
-import { useSelector } from 'react-redux';
-import { select_status, select_draggableId, select_source } from '../../redux/dragDrop/selectors';
+import { useSelector, useDispatch } from 'react-redux';
+import { select_status, select_draggableId, select_source, select_hoveredDroppableId, 
+  // select_hoveredDroppableId
+ } from '../../redux/dragDrop/selectors';
 import echo from '../../echo';
 import { I_draggableData } from '../../redux/dragDrop/dragDrop';
 import get_draggableData from './get_draggableData';
@@ -15,8 +17,10 @@ import translateElement from './translateElement';
   // useDispatch, 
   // useSelector } from 'react-redux';
 // import { dragInit, dragActive } from '../../redux/dragDrop/actions'
-// import { select_status, select_currentDragAction } from '../../redux/dragDrop/selectors';
+// import { select_status, select_currentDragAction, select_hoveredDroppableId } from '../../redux/dragDrop/selectors';
 import extractElement from './extractElement';
+import { dragEnd, dragOver } from '../../redux/dragDrop/actions';
+import get_hoveredDroppableId from './get_hoveredDroppableId';
 
 export interface I_data_draggable {
   id: string;
@@ -84,16 +88,25 @@ interface Props {
 
 export default function Context({children}: Props): ReactElement {
   echo('Context component init...', 'Context');
-  // const dispatch = useDispatch();
+  const dispatch = useDispatch();
   
   const status = useSelector(select_status);
   // console.log(status);
   const draggableId = useSelector(select_draggableId);
   const source = useSelector(select_source);
+  const hoveredId = useSelector(select_hoveredDroppableId);
+  // console.log(hoveredDroppableId)
+  const hoveredDroppableId = useRef<string | null>(null);
+  hoveredDroppableId.current = hoveredId;
 
   const draggableData = useRef<I_draggableData | null>(null);
   const element = useRef<HTMLElement | null>(null);
   const elementIsExtracted = useRef(false);
+
+  const hasMouseMoveListener = useRef(false);
+  const hasMouseUpListener = useRef(false);
+
+
   // console.log(draggableId);
   // console.log('data', JSON.parse(JSON.stringify(data)))
   
@@ -109,11 +122,37 @@ export default function Context({children}: Props): ReactElement {
           extractElement(element.current, draggableData.current);
           elementIsExtracted.current = true;
         }
-
         translateElement(e, element.current, draggableData.current);
+        const currentHoveredDroppableId = get_hoveredDroppableId(e, draggableData.current, data.droppables);
+        console.log('currentHoveredDroppableId', currentHoveredDroppableId)
+        console.log('hoveredDroppableId', hoveredDroppableId.current)
+        console.log('source', source)
+        if(currentHoveredDroppableId !== hoveredDroppableId.current){
+          hoveredDroppableId.current = currentHoveredDroppableId;
+          echo(`Dispatching dragOver for ${currentHoveredDroppableId}`, 'context mousemove', 2);
+          dispatch(dragOver(currentHoveredDroppableId));
+        }
       } else console.error('Unable to find draggableData.current');
     } else console.error('Unable to find element.current');
-  }, []);
+  }, [
+    hoveredDroppableId,
+    source,
+    dispatch,
+  ]);
+
+  const handleMouseUp = useCallback((e: MouseEvent) => {
+    echo('handleMouseUp', 'context mouseup');
+    echo(`Removing eventListener: mousemove from document for draggableId: ${draggableId}`, draggableId+'mouseup', 1);
+    document.removeEventListener('mousemove', handleMouseMove);
+    hasMouseMoveListener.current = false;
+    echo('Dispatching dragEnd', draggableId+'mouseup', 1);
+    dispatch(dragEnd('cancel'));
+    hasMouseUpListener.current = false;
+  }, [
+    draggableId, 
+    handleMouseMove, 
+    dispatch,
+  ]);
 
 
   useEffect(()=>{
@@ -126,7 +165,16 @@ export default function Context({children}: Props): ReactElement {
             if(draggable.current){
               element.current = draggable.current;
               draggableData.current = get_draggableData(element.current);
-              document.addEventListener('mousemove', handleMouseMove);
+              if(!hasMouseMoveListener.current){
+                echo(`Adding eventListener: mousemove to document for draggableId: ${draggableId}`, 'Context', 2);
+                document.addEventListener('mousemove', handleMouseMove);
+                hasMouseMoveListener.current = true;
+              }
+              if(!hasMouseUpListener.current){
+                echo(`Adding eventListener: mouseup to document for draggableId: ${draggableId}`, 'Context', 2);
+                document.addEventListener('mouseup', handleMouseUp, {once: true});
+                hasMouseUpListener.current = true;
+              }
             } else console.error('Unable to find draggable.current');
           } else console.error('Unable to find source');
         } else console.error('Unable to find draggableId');
@@ -143,6 +191,7 @@ export default function Context({children}: Props): ReactElement {
     draggableId,
     source,
     handleMouseMove,
+    handleMouseUp,
   ])
   // const dragAction = useSelector(select_currentDragAction);
   // console.log(dragAction)

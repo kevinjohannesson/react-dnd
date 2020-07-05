@@ -18,9 +18,11 @@ export interface I_DragDropState {
   draggableData: I_draggableData | null;
   hoverId: T_hoverId;
   dragStopReason: T_dragStopReason | null;
+  dragEndReason: T_dragEndReason | null;
   dropPosition: T_vector | null;
   draggableId: string | null;
   source: string | null;
+  hoveredDroppableId: string | null;
 }
 
 export interface I_draggableData {
@@ -37,6 +39,7 @@ export interface I_draggableData {
   };
 }
 
+export const DRAG_OVER = 'DRAG_OVER';
 export const DRAG_END = 'DRAG_END';
 export const DRAG_INIT = 'DRAG_INIT';
 export const DRAG_ACTIVE = 'DRAG_ACTIVE';
@@ -80,12 +83,19 @@ export interface I_dragActive {
   type: typeof DRAG_ACTIVE;
 }
 
+export type T_dragEndReason = 'cancel' | 'drop';
 export interface I_dragEnd {
   type: typeof DRAG_END;
+  dragEndReason: T_dragEndReason;
 }
 
 export interface I_dragFinish {
   type: typeof DRAG_FINISH;
 }
 
-export type Actions = I_dragInit | I_dragActive | I_dragEnd | I_dragFinish
+export interface I_dragOver {
+  type: typeof DRAG_OVER;
+  hoveredDroppableId: string | null;
+}
+
+export type Actions = I_dragInit | I_dragActive | I_dragEnd | I_dragFinish | I_dragOver

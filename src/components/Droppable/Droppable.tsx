@@ -1,4 +1,4 @@
-import React, { ReactElement, useContext } from 'react';
+import React, { ReactElement, useContext, useEffect } from 'react';
 
 import Placeholder from './Placeholder';
 
@@ -6,7 +6,8 @@ import { DragDropContext, I_data_droppable } from '../Context/Context';
 // import echo from '../../echo';
 
 import { useSelector } from 'react-redux';
-import { select_status } from '../../redux/dragDrop/selectors';
+import { select_status, select_hoveredDroppableId, is_hoveredDroppableId } from '../../redux/dragDrop/selectors';
+import echo from '../../echo';
 
 // const data: T_draggables = {};
 
@@ -29,23 +30,12 @@ export default function Droppable({droppableId, placeholderCSS, children}: Props
   // echo('Droppable component init...', '#F2B90F');
   const ref = React.createRef<HTMLDivElement>();
   const context = useContext(DragDropContext);
-  // echo('Adding droppable to the context', '#F2B90F', 1);
+  
   const droppable = context.add_droppable(droppableId, ref);
 
   const status = useSelector(select_status);
-  // const DroppableContext2 = React.createContext(data);
 
-  // useEffect(()=>{
-  //   echo('Droppable useEffect #1', '#F2B90F', 1);
-  //   // data.create_droppable(droppableId);
-  // }, [droppableId]);
-  
-  // useEffect(()=>{
-  //   echo('Droppable useEffect #2', '#F2B90F', 1);
-  //   // context.add_droppable(droppableId, ref);
-  // }, [context, droppableId, ref]);
-
-
+  const isHovered = useSelector(is_hoveredDroppableId(droppableId));
 
   const placeholderRef = React.createRef<HTMLDivElement>();
   const placeholder = <Placeholder 
@@ -66,7 +56,7 @@ export default function Droppable({droppableId, placeholderCSS, children}: Props
   const droppableData: interface_droppableData = {
     ref: ref, 
     userIsDragging: status !== 'inactive',
-    isHovered: false,
+    isHovered,
     placeholder,
   }
   return (
