@@ -53,7 +53,7 @@ export default function Droppable({droppableId, placeholderCSS, children}: Props
     // width={userIsDragging && isHovered && draggableData ? draggableData.width : 0} 
     // height={userIsDragging && isHovered && draggableData ? draggableData.height : 0} 
     // margin={userIsDragging && isHovered && draggableData ? draggableData.margin.all : ''} 
-    active={elementExtracted} 
+    active={elementExtracted && isHovered} 
     width={0}
     height={0}
     margin={''}

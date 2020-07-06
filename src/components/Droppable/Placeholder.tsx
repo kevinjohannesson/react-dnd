@@ -9,7 +9,6 @@ interface Props {
   css?: {[key: string]: string};
 }
 
-
 const Placeholder = React.forwardRef((props: Props, ref) => {
   return <PLACEHOLDER ref={ref as React.RefObject<HTMLDivElement>} {...props} />
 })
@@ -20,6 +19,8 @@ const PLACEHOLDER = styled.div<Props>`
   box-sizing: border-box;
   pointer-events: none;
   user-select: none;
+
+  display: ${props => props.active ? '' : 'block'};
 
   ${props => props.active ? props.css : ''}
 `

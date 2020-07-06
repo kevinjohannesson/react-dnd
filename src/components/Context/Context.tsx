@@ -137,8 +137,6 @@ export default function Context({children}: Props): ReactElement {
                 console.log(draggable.index)
                 const droppable = data.droppables[hoveredDroppableId.current].ref.current;
                 if(droppable) {
-                  // const insertIndex = placeholderIndex > draggableData.index ? draggableData.index : draggableData.index + 1;
-                  // const insertIndex = 
                   droppable.insertBefore(placeholder, droppable.children[draggable.index]);
                   console.log(draggableData);
                   echo(`Extracting element`, 'context mousemove', 1);
@@ -149,6 +147,8 @@ export default function Context({children}: Props): ReactElement {
                   placeholder.style.height = draggableData.current.height + 'px';
                   placeholder.style.width = draggableData.current.width + 'px';
                   placeholder.style.margin = draggableData.current.margin.computed;
+                  const borderRadius = window.getComputedStyle(element.current).getPropertyValue('border-radius');
+                  placeholder.style.borderRadius = borderRadius;
                   dispatch(elementExtracted(true));
                 } else console.error('Unable to locate droppable');
               } else console.error('Unable to locate draggable');
@@ -162,6 +162,21 @@ export default function Context({children}: Props): ReactElement {
           hoveredDroppableId.current = currentHoveredDroppableId;
           echo(`Dispatching dragOver for ${currentHoveredDroppableId}`, 'context mousemove', 2);
           dispatch(dragOver(currentHoveredDroppableId));
+          if(hoveredDroppableId.current){
+            echo('Creating placeholder', 'context mousemove', 2);
+            const placeholder = data.droppables[hoveredDroppableId.current].placeholderRef.current;
+            if(placeholder){
+              console.log(placeholder)
+              echo(`Sizing placeholder element`, 'context mousemove', 1);
+              placeholder.style.boxSizing = 'border-box';
+              placeholder.style.height = draggableData.current.height + 'px';
+              placeholder.style.width = draggableData.current.width + 'px';
+              placeholder.style.margin = draggableData.current.margin.computed;
+              const borderRadius = window.getComputedStyle(element.current).getPropertyValue('border-radius');
+              placeholder.style.borderRadius = borderRadius;
+            } else console.error('Unable to find placeholderRef.current for new droppable')
+          }
+
         }
       } else console.error('Unable to find draggableData.current');
     } else console.error('Unable to find element.current');

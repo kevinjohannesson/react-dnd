@@ -25,12 +25,12 @@ function App() {
     borderRadius: '25px',
     boxShadow: '0px 0px 34px -2px rgba(0,0,0,0.75)',
   }
-  // const placeholder2CSS = {
-  //   border: '3px solid white',
-  //   backgroundColor: 'rgba(255,255,255,0.3)',
-  //   borderRadius: '10px',
-  //   boxShadow: '0px 0px 40px 6px rgba(0,0,0,0.21)'
-  // }
+  const placeholder2CSS = {
+    border: '3px solid red',
+    backgroundColor: 'rgba(255,255,255,0.3)',
+    borderRadius: '10px',
+    boxShadow: '0px 0px 40px 6px rgba(0,0,0,0.21)'
+  }
   return (
     <Context>
       <CONTAINER>
@@ -45,6 +45,18 @@ function App() {
               { shapes.map((shape, index) => 
                   <Block key={shape} id={shape} shape={shape} index={index}/>)}
               {data.placeholder}
+            </DROPAREA>
+          )}
+        </Droppable>
+        <Droppable droppableId="anotherID" placeholderCSS={placeholder2CSS}>
+          {(droppableData: interface_droppableData) => (
+            <DROPAREA 
+              userIsDragging={droppableData.userIsDragging}
+              isHovered={droppableData.isHovered}
+              position={{position: 'absolute', bottom: '10px', left: '10px', right: '10px', height: '200px'}}
+              ref={droppableData.ref} 
+            >
+              {droppableData.placeholder}
             </DROPAREA>
           )}
         </Droppable>
