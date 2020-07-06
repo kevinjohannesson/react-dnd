@@ -7,7 +7,9 @@ import echo, { diff } from '../../echo';
 import { DroppableContext } from '../Droppable/Droppable';
 import { useDispatch, useSelector } from 'react-redux';
 // import get_draggableData from '../Context/get_draggableData';
-import { dragInit, dragEnd, dragFinish, dragActive } from '../../redux/dragDrop/actions';
+import { dragInit, dragEnd, 
+  // dragFinish, 
+  dragActive } from '../../redux/dragDrop/actions';
 import { select_status, userIsDraggingThis, select_hoveredDroppableId } from '../../redux/dragDrop/selectors';
 import { T_vector } from '../../redux/dragDrop/dragDrop.d';
 
@@ -39,7 +41,7 @@ const Draggable = ({draggableId, draggableIndex, children}: Props) => {
 
   const isHovering = useSelector(select_hoveredDroppableId);
   const draggable = droppableContext ? context.add_draggable(draggableId, draggableIndex, droppableContext.id, ref) : null;
-  
+  console.log(draggable);
 
   // if(droppableContext){
   //   testRef.current = context.test(draggableId, droppableContext.id).current

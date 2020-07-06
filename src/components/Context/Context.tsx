@@ -113,7 +113,7 @@ export default function Context({children}: Props): ReactElement {
   const hasMouseMoveListener = useRef(false);
   const hasMouseUpListener = useRef(false);
 
-  const placeholderIndex = useRef(0);
+  // const placeholderIndex = useRef(0);
 
 
   // console.log(draggableId);
@@ -329,7 +329,7 @@ export default function Context({children}: Props): ReactElement {
     dragEndReason,
     dispatch,
   ]);
-  
+
   return (
     <DragDropContext.Provider value={data}>
       {children}
