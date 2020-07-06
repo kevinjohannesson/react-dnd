@@ -7,7 +7,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { select_status, select_draggableId, select_sourceDroppableId, select_hoveredDroppableId, select_dragEndReason, 
   // select_hoveredDroppableId
  } from '../../redux/dragDrop/selectors';
-import echo from '../../echo';
+import echo, { error } from '../../echo';
 import { I_draggableData } from '../../redux/dragDrop/dragDrop';
 import get_draggableData from './get_draggableData';
 import translateElement from './translateElement';
@@ -21,6 +21,7 @@ import translateElement from './translateElement';
 import extractElement from './extractElement';
 import { dragEnd, dragOver, dragFinish, elementExtracted } from '../../redux/dragDrop/actions';
 import get_hoveredDroppableId from './get_hoveredDroppableId';
+
 
 export interface I_data_draggable {
   id: string;
@@ -275,6 +276,45 @@ export default function Context({children}: Props): ReactElement {
             break;
           }
           case 'drop': {
+            echo('Dropping draggable to new droppable', 'Context', 2);
+            if(hoveredDroppableId.current){
+              const placeholder = data.droppables[hoveredDroppableId.current].placeholderRef.current;
+              if(placeholder){
+                const DOMRect = placeholder.getBoundingClientRect();
+                if(draggableId){
+                  if(sourceId){
+                    const draggable = data.droppables[sourceId].draggables[draggableId].ref;
+                    if(draggable.current){
+                      if(draggableData.current){
+                        const droppable = data.droppables[hoveredDroppableId.current].ref.current;
+                        if(droppable){  
+                          const sourceDroppable = data.droppables[sourceId].ref.current;
+                          if(sourceDroppable){
+                            const sourcePlaceholder = data.droppables[sourceId].placeholderRef.current;
+                            if(sourcePlaceholder){
+
+                              const element = draggable.current;
+                              element.style.left = DOMRect.x - draggableData.current.margin.left + 'px';
+                              element.style.top = DOMRect.y - draggableData.current.margin.top + 'px';
+                              
+                              echo(`Resetting component`, 'Context', 2);
+                              element.setAttribute('style', '');
+                              placeholder.setAttribute('style', '');
+                              sourcePlaceholder.setAttribute('style', '');
+                              dispatch(elementExtracted(false));
+                              droppable.appendChild(placeholder);
+                              document.body.style.cursor = '';
+                              dispatch(dragFinish());
+                              
+                            } else error('find', 'sourcePlaceholder');
+                          } else error('find', 'sourceDroppable');
+                        } else error('find', 'droppable')
+                      } else error('find', 'draggableData.current');
+                    } else error('find', 'draggable.current');
+                  } else error('find', 'sourceId');
+                } else error('find', 'placeholder');
+              } else error('find', 'draggableId');
+            } else error('find', 'hoveredDroppableId.current');
             break;
           }
         }
@@ -288,119 +328,11 @@ export default function Context({children}: Props): ReactElement {
     handleMouseUp,
     dragEndReason,
     dispatch,
-  ])
-  // const dragAction = useSelector(select_currentDragAction);
-  // console.log(dragAction)
-
-  // const handleMouseDown = useCallback((droppableId, draggableId) => {
-  //   echo('handleMouseDown', '#698C35');
-  //   echo('Calculating draggable data', '#698C35', 1);
-  //   console.log(data.droppables[draggableId]);
-  //   console.log(draggableId, droppableId)
-  //   const draggable = data.droppables[draggableId].draggables[droppableId];
-  //   if(draggable.ref.current){
-  //     const draggableData = get_draggableData(draggable.ref.current);
-  //     echo('Dispatching dragInit', '#698C35', 1);
-  //     dispatch(dragInit(draggableId, draggableData, droppableId ));
-  //   } else console.error('Unable to find draggable with id: ', draggableId);
-  // }, [dispatch]);
-
-  // const handleMouseMove = useCallback((e: MouseEvent, dragAction: {draggableId: string, source: string})=> {
-  //   echo('handleMouseMove', '#F2780C');
-  //   console.log(dragAction)
-  //   // const draggable 
-  //   // const draggable = data.droppables[dragAction.source].draggables[dragAction.draggableId];
-  //   // console.log(draggable.ref);
-  //   // if(draggable.ref.current){
-  //     // const draggableData = get_draggableData(draggable.ref.current);
-  //     // draggable.ref.current.style.left = (e.clientX - draggableData.margin.left - (draggableData.width/2) ) + 'px';
-  //     // draggable.ref.current.style.top = (e.clientY - draggableData.margin.top - (draggableData.height/2)) + 'px';
-  //     // draggable.ref.current.style.position = 'fixed';
-  //   // }
-  // }, []);
-
-  // const handleMouseUp = useCallback((e: MouseEvent) => {
-
-  // }, []);
-
-  // useEffect(()=>{
-  //   echo('Context useEffect #1', '#D2D9A3', 1);
-  //   for(const droppableId in data.droppables){
-  //     for(const draggableId in data.droppables[droppableId].draggables){
-  //       const draggable = data.droppables[droppableId].draggables[draggableId];
-  //       const element = draggable.ref.current;
-  //       if(element) {
-  //         const draggableData = get_draggableData(element);
-  //         const new_draggable: I_data_draggable = {
-  //           ...draggable,
-  //           ...draggableData
-  //         };
-  //         echo(`Storing Draggable component DOM information`, '#D2D9A3', 2);
-  //         data.droppables[droppableId].draggables[draggableId] = new_draggable;
-  //         echo(`Adding eventListener: mousedown to draggableId: ${draggableId}`, '#D2D9A3', 2);
-  //         element.addEventListener('mousedown', () => handleMouseDown(draggableId, droppableId), {once: true});
-  //       } else console.error('DOM Element not found.')
-  //     }
-  //   }
-
-  // }, [handleMouseDown]);
-
-  // useEffect(() => {
-  //   echo('Context useEffect #2', '#D2D9A3', 1);
-  //   if(status === 'init'){
-  //     console.log(data)
-  //     console.log(dragAction)
-  //     if(dragAction) {
-  //       echo(`Adding mousemove listener for ${dragAction.draggableId}`, '#D2D9A3', 2);
-  //       document.addEventListener('mousemove', (e)=>handleMouseMove(e, dragAction));
-  //       dispatch(dragActive());
-  //     } else console.error('dragAction not found');
-  //   }
-  // }, [status, dragAction, handleMouseMove, dispatch]);
-
-
+  ]);
+  
   return (
     <DragDropContext.Provider value={data}>
       {children}
     </DragDropContext.Provider>
   )
 }
-
-
-// const checkboxes = {
-//   jsFrameworks: {day: 'str', price: 15, checked: false},
-//   jsLibs: {day: 'str', price: 15, checked: false},
-//   express: {day: 'str', price: 15, checked: false},
-//   node: {day: 'str', price: 15, checked: false},
-//   buildTools: {day: 'str', price: 15, checked: false},
-//   npm: {day: 'str', price: 15, checked: false},
-// }
-
-// const camelCaseName = (string: string) => (
-//   string.split('-').map((piece, i)=> {
-//     if(i === 0) return piece 
-//     else return piece.charAt(0).toUpperCase() + piece.slice(1)
-//   }
-//   ).join('')
-// )
-
-// jeCheckboxElement.addEventListener('change', (e)=>checkboxes[camelCaseName(jeCheckboxNameDataAttribute)].checked = e.target.checked)
-
-
-// const allCheckboxes = Array.from(document.querySelectorAll('input[type=checkbox]'));
-// const checkboxes: {[key: string]: any} = {}
-// allCheckboxes.forEach( checkbox => {
-//   const name = checkbox.getAttribute('data-name');
-//   if(name){
-//     const cC_name = camelCaseName(name);
-//     checkboxes[cC_name] = {
-//       day: checkbox.getAttribute('day-and-time'),
-//       price: checkbox.getAttribute('price'),
-//       checked: checkbox.checked,
-//     }
-//     checkbox.addEventListener('change', (e)=>checkboxes[cC_name].checked = e.target.checked)
-//   }
-// } )
-
-
-// console.log(allCheckboxes)

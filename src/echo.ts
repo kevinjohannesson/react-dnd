@@ -17,3 +17,10 @@ export default function echo(str: string, id: string, level?: number){
 
 
 export function diff (a: number, b: number) { return a > b ? a - b : b - a };
+
+export function error (type: 'find', varName: string) { 
+  const types = {
+    find: 'Unable to find',
+  }
+  console.error(`${types[type]} ${varName}`);
+}
