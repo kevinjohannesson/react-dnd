@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 
 import Droppable, { interface_droppableData } from './components/Droppable/Droppable';
@@ -16,6 +16,10 @@ import Context from './components/Context/Context';
 // const shapes: SHAPE[] = ['square','rectangle','circle'];
 const shapes: SHAPE[] = ['circle','rectangle'];
 // const shapes: SHAPE[] = ['square'];
+const initialState: {[key: string]: SHAPE[]} = {
+  uniqueID: ['circle', 'rectangle'],
+  anotherID: ['square'],
+}
 
 function App() {
   
@@ -31,8 +35,26 @@ function App() {
     borderRadius: '10px',
     boxShadow: '0px 0px 40px 6px rgba(0,0,0,0.21)'
   }
+
+  
+
+  const [droppables, set_droppables] = useState(initialState);
+
+  const onDragEnd = (result: any) => {
+    console.log('onDragEnd');
+    console.log(result);
+    const new_sourceId = [...droppables[result.sourceId]].filter(shape => shape !== result.draggableId);
+    const new_destinationId = [ ...droppables[result.destinationId], result.draggableId];
+    const new_state = {
+      ...droppables,
+      [result.sourceId]: new_sourceId,
+      [result.destinationId]: new_destinationId,
+    }
+    set_droppables(new_state);
+  }
+
   return (
-    <Context>
+    <Context onDragEnd={onDragEnd}>
       <CONTAINER>
         
         <Droppable droppableId="uniqueID" placeholderCSS={placeholderCSS}>
@@ -42,8 +64,13 @@ function App() {
               isHovered={data.isHovered}
               ref={data.ref}
             >
-              { shapes.map((shape, index) => 
-                  <Block key={shape} id={shape} shape={shape} index={index}/>)}
+              {
+                droppables.uniqueID.map((shape, index) => 
+                  <Block key={shape} id={shape} shape={shape} index={index}/>
+                )
+              }
+              {/* { shapes.map((shape, index) => 
+                  <Block key={shape} id={shape} shape={shape} index={index}/>)} */}
               {data.placeholder}
             </DROPAREA>
           )}
@@ -54,8 +81,14 @@ function App() {
               userIsDragging={droppableData.userIsDragging}
               isHovered={droppableData.isHovered}
               position={{position: 'absolute', bottom: '10px', left: '10px', right: '10px', height: '200px'}}
+              direction={'row'}
               ref={droppableData.ref} 
             >
+              {
+                droppables.anotherID.map((shape, index) => 
+                  <Block key={shape} id={shape} shape={shape} index={index}/>
+                )
+              }
               {droppableData.placeholder}
             </DROPAREA>
           )}
@@ -108,7 +141,8 @@ const CONTAINER = styled.div`
 const DROPAREA = styled.div<{
   userIsDragging: boolean, 
   isHovered: boolean,
-  position?: any;
+  position?: any,
+  direction?: 'row',
 }>`
   min-width: 100px;
   min-height: 100px;
@@ -121,7 +155,7 @@ const DROPAREA = styled.div<{
   ${props => props.position || ''}
 
   display: flex;
-  flex-direction: column;
+  ${props => props.direction === 'row' ? 'flex-direction: row' : 'flex-direction: column'};
   align-items: center;
   justify-content: center;
 

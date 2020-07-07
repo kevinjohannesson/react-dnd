@@ -87,10 +87,11 @@ const data: I_data = {
 export const DragDropContext = React.createContext(data);
 
 interface Props {
+  onDragEnd: (result: any)=>any;
   children: any;
 }
 
-export default function Context({children}: Props): ReactElement {
+export default function Context({onDragEnd, children}: Props): ReactElement {
   echo('Context component init...', 'Context');
   const dispatch = useDispatch();
   
@@ -296,6 +297,14 @@ export default function Context({children}: Props): ReactElement {
                               const element = draggable.current;
                               element.style.left = DOMRect.x - draggableData.current.margin.left + 'px';
                               element.style.top = DOMRect.y - draggableData.current.margin.top + 'px';
+
+                              const result = {
+                                sourceId,
+                                destinationId: hoveredDroppableId.current,
+                                draggableId: data.droppables[sourceId].draggables[draggableId].id,
+                              }
+
+                              onDragEnd(result);
                               
                               echo(`Resetting component`, 'Context', 2);
                               element.setAttribute('style', '');
@@ -328,6 +337,7 @@ export default function Context({children}: Props): ReactElement {
     handleMouseUp,
     dragEndReason,
     dispatch,
+    onDragEnd,
   ]);
 
   return (
