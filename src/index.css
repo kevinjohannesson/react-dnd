@@ -8,8 +8,10 @@ body {
 
   width: 100vw;
   height: 100vh;
-  background: rgb(0,255,128);
-  background: linear-gradient(0deg, rgba(0,255,128,1) 0%, rgba(202,255,0,1) 100%);
+  background: #5C258D;  /* fallback for old browsers */
+background: -webkit-linear-gradient(to left, #4389A2, #5C258D);  /* Chrome 10-25, Safari 5.1-6 */
+background: linear-gradient(to right, #4389A2, #5C258D); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+
 }
 
 code {
@@ -19,4 +21,11 @@ code {
 
 *{
   box-sizing: border-box;
+}
+
+#root {
+  height: 100%;
+  width: 100%;
+
+  display: flex;
 }
