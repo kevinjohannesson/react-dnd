@@ -11,8 +11,8 @@ A set of components for Drag and Drop in React.
 >Current version supports dragging and dropping with multiple events and custom CSS per droppable container for the placeholder.
 
 ## Usage (basic):
-### Context:
-```<Context onDragEnd={onDragEnd}>
+```
+<Context onDragEnd={onDragEnd}>
         
         <Droppable droppableId="uniqueDroppableId">
           {(droppableData) => (
@@ -26,9 +26,8 @@ A set of components for Drag and Drop in React.
             </div>
           )}
         </Droppable>
-        
+
         <Droppable droppableId="anotherDroppableId">
-          <Droppable droppableId="uniqueDroppableId">
           {(droppableData) => (
             <div>
               <Draggable draggableId="anotherDraggableId" draggableIndex={0}>
@@ -41,4 +40,5 @@ A set of components for Drag and Drop in React.
           )}
         </Droppable>
         
-    </Context>```
+</Context>
+```
