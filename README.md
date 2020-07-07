@@ -9,3 +9,36 @@ A set of components for Drag and Drop in React.
 <img src="http://kevinkroon.nl/images/react_drag_drop.gif" />
 
 >Current version supports dragging and dropping with multiple events and custom CSS per droppable container for the placeholder.
+
+## Usage (basic):
+### Context:
+```<Context onDragEnd={onDragEnd}>
+        
+        <Droppable droppableId="uniqueDroppableId">
+          {(droppableData) => (
+            <div>
+              <Draggable draggableId="uniqueDraggableId" draggableIndex={0}>
+                {(draggableData) => (
+                  <div/>
+                )}
+              </Draggable>
+              {data.placeholder}
+            </div>
+          )}
+        </Droppable>
+        
+        <Droppable droppableId="anotherDroppableId">
+          <Droppable droppableId="uniqueDroppableId">
+          {(droppableData) => (
+            <div>
+              <Draggable draggableId="anotherDraggableId" draggableIndex={0}>
+                {(draggableData) => (
+                  <div/>
+                )}
+              </Draggable>
+              {data.placeholder}
+            </div>
+          )}
+        </Droppable>
+        
+    </Context>```
