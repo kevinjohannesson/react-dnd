@@ -14,7 +14,7 @@ import Context from './components/Context/Context';
 
 
 // const shapes: SHAPE[] = ['square','rectangle','circle'];
-const shapes: SHAPE[] = ['circle','rectangle'];
+// const shapes: SHAPE[] = ['circle','rectangle'];
 // const shapes: SHAPE[] = ['square'];
 const initialState: {[key: string]: SHAPE[]} = {
   uniqueID: ['circle', 'rectangle'],

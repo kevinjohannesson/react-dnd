@@ -20,7 +20,7 @@ const PLACEHOLDER = styled.div<Props>`
   pointer-events: none;
   user-select: none;
 
-  display: ${props => props.active ? '' : 'block'};
+  display: ${props => props.active ? 'block' : 'none'};
 
   ${props => props.active ? props.css : ''}
 `
