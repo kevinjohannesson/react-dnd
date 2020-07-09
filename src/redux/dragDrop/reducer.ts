@@ -80,6 +80,7 @@ export default function reducer(
         ...state,
         sourceDroppableId: null,
         draggableId: null,
+        hoveredDroppableId: null,
         // draggableData: null,
         dragEndReason: null,
         status: 'inactive'
